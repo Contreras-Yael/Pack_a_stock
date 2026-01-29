@@ -11,18 +11,18 @@ class PackAStockApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false, // Quita la etiqueta "Debug"
+      debugShowCheckedModeBanner: false, 
       title: 'Pack-a-Stock',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const PantallaLogin(), // Arrancamos en el Login
+      home: const PantallaLogin(),
     );
   }
 }
 
-// 2. Pantalla de Inicio de Sesión (Sencilla)
+// 2. Pantalla de Inicio de Sesión
 class PantallaLogin extends StatelessWidget {
   const PantallaLogin({super.key});
 
@@ -65,7 +65,6 @@ class PantallaLogin extends StatelessWidget {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Mágica navegación a la siguiente pantalla
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const PantallaPrincipal()),
@@ -82,7 +81,7 @@ class PantallaLogin extends StatelessWidget {
   }
 }
 
-// 3. Pantalla Principal (El Layout que pediste)
+// 3. Pantalla Principal
 class PantallaPrincipal extends StatelessWidget {
   const PantallaPrincipal({super.key});
 
@@ -120,7 +119,7 @@ class PantallaPrincipal extends StatelessWidget {
               child: Row(
                 children: [
                   // Recuadro Izquierdo
-                  Expanded( // "Expanded" obliga al hijo a llenar el espacio disponible
+                  Expanded(
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.orangeAccent,
