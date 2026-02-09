@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/login.dart'; // Importa la pantalla de login
+import 'screens/auth/login_screen.dart'; // Importa la pantalla de login
 
 void main() {
   runApp(const PackAStockApp());
