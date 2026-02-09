@@ -3,7 +3,12 @@ import 'package:http/http.dart' as http;
 import '../models/user_model.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://10.0.2.2:8000/api'; 
+  static const String baseUrl = 'http://198.71.54.179:8000/api'; 
+
+  static const Map<String, String> headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
 
   Future<User?> login(String email, String password) async {
     final url = Uri.parse('$baseUrl/token/');
@@ -11,6 +16,7 @@ class ApiService {
     try {
       final response = await http.post(
         url,
+        headers: headers,
         body: {
           'email': email,
           'password': password,
@@ -21,7 +27,7 @@ class ApiService {
         final Map<String, dynamic> data = json.decode(response.body);
         return User.fromJson(data);
       } else {
-        print('Error en login: ${response.body}');
+        print('Error Servidor: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e) {
@@ -30,5 +36,27 @@ class ApiService {
     }
   }
   
-  // Aquí agregaremos luego getMaterials(), createLoan(), etc.
+  Future<List<dynamic>> getMateirials(String token) async {
+    final url = Uri.parse('$baseUrl/materials/');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // final List<dynamic> data = json.decode(response.body);
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Fallo al cargar materiales: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error de conexión: $e');
+      return [];
+    }
+  }
 }
