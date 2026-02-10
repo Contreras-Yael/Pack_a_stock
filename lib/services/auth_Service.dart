@@ -8,8 +8,8 @@ class AuthService {
   final StorageService _storage = StorageService();
   
   Future<User?> login(String email, String password) async {
-    // Nota: Revisa si tu backend requiere slash al final '/token/' o no.
-    final url = Uri.parse('${ApiConfig.baseUrl}/token/');
+    // Cambiar según el endpoint correcto de tu backend
+    final url = Uri.parse('${ApiConfig.baseUrl}/auth/login/');
 
     try {
       final response = await http.post(

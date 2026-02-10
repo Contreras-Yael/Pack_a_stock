@@ -1,29 +1,11 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const PackAStockApp());
-}
-
-class PackAStockApp extends StatelessWidget {
-  const PackAStockApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Pack-a-Stock',
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF0F0F1E),
-        primaryColor: const Color(0xFF7C3AED),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF7C3AED),
-          secondary: Color(0xFFA855F7),
-          surface: Color(0xFF1A1A2E),
-        ),
-      ),
-      home: const HomeScreen(),
-    );
-  }
-}
+import '../scanner/qr_scanner_screen.dart';
+import '../cart/cart_screen.dart';
+import '../history/history_screen.dart';
+import '../profile/profile_screen.dart';
+import '../notifications/notifications_screen.dart';
+import '../../widgets/app_drawer.dart';
+import '../../services/notification_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -31,6 +13,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AppDrawer(currentRoute: 'home'),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -61,76 +44,139 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
   Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Hola, Carlos',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  'Pack-a-Stock Demo',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[400],
-                  ),
-                ),
-              ],
-            ),
-            Stack(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1A1A2E),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.notifications_outlined,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
+    return Builder(
+      builder: (context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF7C3AED), Color(0xFFA855F7)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.inventory_2,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Pack-a-Stock',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              Text(
+                                'Sistema de Gestión de Préstamos',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF7C3AED),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ],
-        ),
-      ],
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+                  );
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Stack(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1A1A2E),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.notifications_outlined,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    if (NotificationService().unreadCount > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFEF4444),
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '${NotificationService().unreadCount}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildScanButton(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigate to scanner
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const QRScannerScreen()),
+        );
       },
       child: Container(
         width: double.infinity,
@@ -201,48 +247,19 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 15),
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionCard(
-                icon: Icons.inventory_2_outlined,
-                title: 'Mis Préstamos',
-                subtitle: '3 activos',
-                color: const Color(0xFF3B82F6),
-              ),
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: _buildActionCard(
-                icon: Icons.add_circle_outline,
-                title: 'Solicitar',
-                subtitle: 'Nuevo pedido',
-                color: const Color(0xFF10B981),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 15),
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionCard(
-                icon: Icons.history,
-                title: 'Historial',
-                subtitle: 'Ver todo',
-                color: const Color(0xFFF59E0B),
-              ),
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: _buildActionCard(
-                icon: Icons.search,
-                title: 'Buscar',
-                subtitle: 'Artículos',
-                color: const Color(0xFFEC4899),
-              ),
-            ),
-          ],
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CartScreen()),
+            );
+          },
+          child: _buildActionCard(
+            icon: Icons.add_circle_outline,
+            title: 'Solicitar Nuevo Pedido',
+            subtitle: 'Agregar materiales a tu carrito',
+            color: const Color(0xFF10B981),
+          ),
         ),
       ],
     );
@@ -506,47 +523,6 @@ class HomeScreen extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomNavBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF7C3AED),
-        unselectedItemColor: Colors.grey[600],
-        currentIndex: 0,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.qr_code_scanner),
-            label: 'Escanear',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'Historial',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Perfil',
           ),
         ],
       ),
