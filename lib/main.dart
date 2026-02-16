@@ -38,8 +38,8 @@ class PackAStockApp extends StatelessWidget {
           foregroundColor: Colors.white,
         ),
       ),
-      home: const HomeScreen(), // Cambiado temporalmente para desarrollo
-      // home: const PantallaLogin(), // Descomentar cuando el backend esté listo
+      //home: const HomeScreen(), // Cambiado temporalmente para desarrollo
+      home: const PantallaLogin(), // Descomentar cuando el backend esté listo
       routes: {
         '/scanner': (context) => const QRScannerScreen(),
         '/cart': (context) => const CartScreen(),

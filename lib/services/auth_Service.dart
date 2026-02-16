@@ -9,7 +9,7 @@ class AuthService {
   
   Future<User?> login(String email, String password) async {
     
-    final url = Uri.parse('${ApiConfig.baseUrl}/token/');
+    final url = Uri.parse('${ApiConfig.baseUrl}/auth/login/');
 
     try {
       print("📡 Intentando conectar a: $url"); // Log para depurar
