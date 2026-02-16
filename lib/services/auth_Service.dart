@@ -8,9 +8,8 @@ class AuthService {
   final StorageService _storage = StorageService();
   
   Future<User?> login(String email, String password) async {
-    // ⚠️ CORRECCIÓN 1: Agregamos el endpoint específico '/auth/login/'
-    // ApiConfig.baseUrl solo llega hasta '/api'
-    final url = Uri.parse('${ApiConfig.baseUrl}/auth/login/');
+    
+    final url = Uri.parse('${ApiConfig.baseUrl}/token/');
 
     try {
       print("📡 Intentando conectar a: $url"); // Log para depurar
