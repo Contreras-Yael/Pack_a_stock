@@ -1,6 +1,7 @@
+import 'package:flutter/foundation.dart';
 import '../models/cart_item_model.dart';
 
-class CartService {
+class CartService extends ChangeNotifier {
   // Singleton
   static final CartService _instance = CartService._internal();
   factory CartService() => _instance;
@@ -19,34 +20,36 @@ class CartService {
     );
 
     if (existingIndex != -1) {
-      // Actualizar cantidad
       _cartItems[existingIndex].quantity += item.quantity;
     } else {
-      // Agregar nuevo item
       _cartItems.add(item);
     }
+    notifyListeners();
   }
 
   void removeFromCart(int materialId) {
     _cartItems.removeWhere((item) => item.materialId == materialId);
+    notifyListeners();
   }
 
   void updateQuantity(int materialId, int newQuantity) {
     final index = _cartItems.indexWhere(
       (item) => item.materialId == materialId,
     );
-    
+
     if (index != -1) {
       if (newQuantity <= 0) {
-        removeFromCart(materialId);
+        _cartItems.removeAt(index);
       } else {
         _cartItems[index].quantity = newQuantity;
       }
+      notifyListeners();
     }
   }
 
   void clearCart() {
     _cartItems.clear();
+    notifyListeners();
   }
 
   bool isInCart(int materialId) {

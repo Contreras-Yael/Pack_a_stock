@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../material/material_detail_screen.dart';
-import '../../models/material_model.dart';
+import '../../services/material_service.dart';
 
 class QRScannerScreen extends StatefulWidget {
   const QRScannerScreen({super.key});
@@ -11,8 +11,9 @@ class QRScannerScreen extends StatefulWidget {
 }
 
 class _QRScannerScreenState extends State<QRScannerScreen> {
-  MobileScannerController cameraController = MobileScannerController();
-  bool _screenOpened = false;
+  final MobileScannerController cameraController = MobileScannerController();
+  final MaterialService _materialService = MaterialService();
+  bool _processing = false;
 
   @override
   void dispose() {
@@ -20,35 +21,42 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     super.dispose();
   }
 
-  void _foundBarcode(BarcodeCapture capture) {
-    if (!_screenOpened && capture.barcodes.isNotEmpty) {
-      final String? code = capture.barcodes.first.rawValue;
-      
-      if (code != null && code.isNotEmpty) {
-        _screenOpened = true;
-        
-        // TODO: Cuando el backend esté listo, hacer petición con el código QR
-        // Por ahora, creamos datos de ejemplo
-        final mockMaterial = MaterialItem(
-          id: 1,
-          name: 'Cable HDMI 2m',
-          description: 'Cable HDMI de alta velocidad, 2 metros de longitud. Compatible con 4K.',
-          sku: code,
-          qrCode: code,
-          availableQuantity: 5,
-          status: 'available',
-        );
+  Future<void> _foundBarcode(BarcodeCapture capture) async {
+    if (_processing || capture.barcodes.isEmpty) return;
+    final String? code = capture.barcodes.first.rawValue;
+    if (code == null || code.isEmpty) return;
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MaterialDetailScreen(material: mockMaterial),
+    setState(() => _processing = true);
+    await cameraController.stop();
+
+    final material = await _materialService.getByQr(code);
+
+    if (!mounted) return;
+
+    if (material != null) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MaterialDetailScreen(material: material),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Material no encontrado para QR: $code'),
+          backgroundColor: const Color(0xFFEF4444),
+          action: SnackBarAction(
+            label: 'OK',
+            textColor: Colors.white,
+            onPressed: () {},
           ),
-        ).then((_) {
-          _screenOpened = false;
-        });
-      }
+        ),
+      );
     }
+
+    // Resume scanning
+    await cameraController.start();
+    if (mounted) setState(() => _processing = false);
   }
 
   @override
@@ -74,12 +82,25 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             controller: cameraController,
             onDetect: _foundBarcode,
           ),
-          // Overlay con área de escaneo
           CustomPaint(
             painter: ScannerOverlay(),
             child: Container(),
           ),
-          // Instrucciones
+          if (_processing)
+            Container(
+              color: Colors.black54,
+              child: const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: Color(0xFF7C3AED)),
+                    SizedBox(height: 16),
+                    Text('Buscando material...',
+                        style: TextStyle(color: Colors.white, fontSize: 16)),
+                  ],
+                ),
+              ),
+            ),
           Positioned(
             bottom: 100,
             left: 0,
@@ -117,7 +138,6 @@ class ScannerOverlay extends CustomPainter {
       height: 250,
     );
 
-    // Dibujar fondo oscuro
     canvas.drawPath(
       Path()
         ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
@@ -126,7 +146,6 @@ class ScannerOverlay extends CustomPainter {
       paint,
     );
 
-    // Dibujar bordes del área de escaneo
     final borderPaint = Paint()
       ..color = const Color(0xFF7C3AED)
       ..style = PaintingStyle.stroke
@@ -134,62 +153,30 @@ class ScannerOverlay extends CustomPainter {
 
     canvas.drawRect(scanArea, borderPaint);
 
-    // Dibujar esquinas
     final cornerPaint = Paint()
       ..color = const Color(0xFF7C3AED)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5
       ..strokeCap = StrokeCap.round;
 
-    final cornerLength = 30.0;
+    const cornerLength = 30.0;
 
-    // Esquina superior izquierda
-    canvas.drawLine(
-      Offset(scanArea.left, scanArea.top),
-      Offset(scanArea.left + cornerLength, scanArea.top),
-      cornerPaint,
-    );
-    canvas.drawLine(
-      Offset(scanArea.left, scanArea.top),
-      Offset(scanArea.left, scanArea.top + cornerLength),
-      cornerPaint,
-    );
-
-    // Esquina superior derecha
-    canvas.drawLine(
-      Offset(scanArea.right, scanArea.top),
-      Offset(scanArea.right - cornerLength, scanArea.top),
-      cornerPaint,
-    );
-    canvas.drawLine(
-      Offset(scanArea.right, scanArea.top),
-      Offset(scanArea.right, scanArea.top + cornerLength),
-      cornerPaint,
-    );
-
-    // Esquina inferior izquierda
-    canvas.drawLine(
-      Offset(scanArea.left, scanArea.bottom),
-      Offset(scanArea.left + cornerLength, scanArea.bottom),
-      cornerPaint,
-    );
-    canvas.drawLine(
-      Offset(scanArea.left, scanArea.bottom),
-      Offset(scanArea.left, scanArea.bottom - cornerLength),
-      cornerPaint,
-    );
-
-    // Esquina inferior derecha
-    canvas.drawLine(
-      Offset(scanArea.right, scanArea.bottom),
-      Offset(scanArea.right - cornerLength, scanArea.bottom),
-      cornerPaint,
-    );
-    canvas.drawLine(
-      Offset(scanArea.right, scanArea.bottom),
-      Offset(scanArea.right, scanArea.bottom - cornerLength),
-      cornerPaint,
-    );
+    canvas.drawLine(Offset(scanArea.left, scanArea.top),
+        Offset(scanArea.left + cornerLength, scanArea.top), cornerPaint);
+    canvas.drawLine(Offset(scanArea.left, scanArea.top),
+        Offset(scanArea.left, scanArea.top + cornerLength), cornerPaint);
+    canvas.drawLine(Offset(scanArea.right, scanArea.top),
+        Offset(scanArea.right - cornerLength, scanArea.top), cornerPaint);
+    canvas.drawLine(Offset(scanArea.right, scanArea.top),
+        Offset(scanArea.right, scanArea.top + cornerLength), cornerPaint);
+    canvas.drawLine(Offset(scanArea.left, scanArea.bottom),
+        Offset(scanArea.left + cornerLength, scanArea.bottom), cornerPaint);
+    canvas.drawLine(Offset(scanArea.left, scanArea.bottom),
+        Offset(scanArea.left, scanArea.bottom - cornerLength), cornerPaint);
+    canvas.drawLine(Offset(scanArea.right, scanArea.bottom),
+        Offset(scanArea.right - cornerLength, scanArea.bottom), cornerPaint);
+    canvas.drawLine(Offset(scanArea.right, scanArea.bottom),
+        Offset(scanArea.right, scanArea.bottom - cornerLength), cornerPaint);
   }
 
   @override

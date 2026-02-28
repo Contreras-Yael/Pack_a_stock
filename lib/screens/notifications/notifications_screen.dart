@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../services/notification_service.dart';
 import '../../widgets/app_drawer.dart';
+import '../history/history_screen.dart';
+import '../loans/loans_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -175,7 +177,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           if (!notification.isRead) {
             _notificationService.markAsRead(notification.id);
           }
-          // TODO: Navegar al detalle si tiene orderId
+          _navigateToDetail(notification);
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(
@@ -281,6 +283,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       return 'hace $days día${days == 1 ? '' : 's'}';
     } else {
       return DateFormat('d MMM, HH:mm', 'es').format(timestamp);
+    }
+  }
+
+  void _navigateToDetail(NotificationItem notification) {
+    if (notification.orderId == null) return;
+
+    // Loan-related types go to LoansScreen
+    if (notification.type == NotificationType.expirationWarning ||
+        notification.type == NotificationType.expired) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LoansScreen()),
+      );
+    } else if (notification.type == NotificationType.approved ||
+        notification.type == NotificationType.rejected) {
+      // Request-related types go to HistoryScreen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const HistoryScreen()),
+      );
     }
   }
 

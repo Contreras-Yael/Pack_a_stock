@@ -47,13 +47,11 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
           label: 'VER CARRITO',
           textColor: Colors.white,
           onPressed: () {
-            Navigator.pushNamed(context, '/cart');
+            Navigator.pushReplacementNamed(context, '/cart');
           },
         ),
       ),
     );
-
-    Navigator.pop(context);
   }
 
   @override
@@ -75,22 +73,39 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                   // Header con imagen/icono
                   Container(
                     width: double.infinity,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFF7C3AED),
-                          const Color(0xFFA855F7).withOpacity(0.8),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.inventory_2_outlined,
-                        size: 80,
-                        color: Colors.white,
+                    color: const Color(0xFF1A1A2E),
+                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                    child: Center(
+                      child: Container(
+                        width: 200,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F0F1E),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(0xFF7C3AED).withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: widget.material.imageUrl != null &&
+                                widget.material.imageUrl!.isNotEmpty
+                            ? Image.network(
+                                widget.material.imageUrl!,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) =>
+                                    _buildImagePlaceholder(),
+                                loadingBuilder: (_, child, progress) =>
+                                    progress == null
+                                        ? child
+                                        : const Center(
+                                            child: CircularProgressIndicator(
+                                              color: Color(0xFF7C3AED),
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                              )
+                            : _buildImagePlaceholder(),
                       ),
                     ),
                   ),
@@ -298,6 +313,28 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildImagePlaceholder() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF7C3AED),
+            const Color(0xFFA855F7).withOpacity(0.8),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.inventory_2_outlined,
+          size: 80,
+          color: Colors.white,
+        ),
       ),
     );
   }

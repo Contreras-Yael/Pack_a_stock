@@ -14,7 +14,24 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   final CartService _cartService = CartService();
+  final TextEditingController _purposeController = TextEditingController();
   DateTime? _selectedDate;
+  DateTime? _returnDate;
+
+  @override
+  void dispose() {
+    _purposeController.dispose();
+    super.dispose();
+  }
+
+  ThemeData get _datePickerTheme => Theme.of(context).copyWith(
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF7C3AED),
+          onPrimary: Colors.white,
+          surface: Color(0xFF1A1A2E),
+          onSurface: Colors.white,
+        ),
+      );
 
   Future<void> _selectPickupDate() async {
     final DateTime? picked = await showDatePicker(
@@ -22,25 +39,34 @@ class _CartScreenState extends State<CartScreen> {
       initialDate: DateTime.now().add(const Duration(days: 1)),
       firstDate: DateTime.now().add(const Duration(days: 1)),
       lastDate: DateTime.now().add(const Duration(days: 30)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF7C3AED),
-              onPrimary: Colors.white,
-              surface: Color(0xFF1A1A2E),
-              onSurface: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: (context, child) =>
+          Theme(data: _datePickerTheme, child: child!),
     );
 
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
+        // Reset return date if it's before the new pickup date
+        if (_returnDate != null && !_returnDate!.isAfter(picked)) {
+          _returnDate = null;
+        }
       });
+    }
+  }
+
+  Future<void> _selectReturnDate() async {
+    final firstReturn = (_selectedDate ?? DateTime.now()).add(const Duration(days: 1));
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: firstReturn,
+      firstDate: firstReturn,
+      lastDate: DateTime.now().add(const Duration(days: 180)),
+      builder: (context, child) =>
+          Theme(data: _datePickerTheme, child: child!),
+    );
+
+    if (picked != null) {
+      setState(() => _returnDate = picked);
     }
   }
 
@@ -54,13 +80,25 @@ class _CartScreenState extends State<CartScreen> {
       );
       return;
     }
+    if (_returnDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor selecciona una fecha de devolución'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
 
+    final purpose = _purposeController.text.trim();
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => OrderConfirmationScreen(
           cartItems: _cartService.cartItems,
           pickupDate: _selectedDate!,
+          returnDate: _returnDate!,
+          purpose: purpose.isNotEmpty ? purpose : null,
         ),
       ),
     );
@@ -316,6 +354,73 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
+  Widget _buildDateSelector({
+    required String label,
+    required DateTime? value,
+    required VoidCallback onTap,
+    required String hint,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 10),
+        InkWell(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F0F1E),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: value != null
+                    ? const Color(0xFF7C3AED)
+                    : Colors.white.withOpacity(0.2),
+                width: 2,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  color: value != null
+                      ? const Color(0xFF7C3AED)
+                      : Colors.grey[600],
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  value != null
+                      ? DateFormat('dd/MM/yyyy').format(value)
+                      : hint,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: value != null ? Colors.white : Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (value != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              DateFormat('EEEE d \'de\' MMMM', 'es').format(value),
+              style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildPickupDateSelector() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -331,8 +436,24 @@ class _CartScreenState extends State<CartScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildDateSelector(
+            label: 'Fecha de Retiro',
+            value: _selectedDate,
+            onTap: _selectPickupDate,
+            hint: 'Seleccionar fecha',
+          ),
+          const SizedBox(height: 16),
+          _buildDateSelector(
+            label: 'Fecha de Devolución',
+            value: _returnDate,
+            onTap: _selectReturnDate,
+            hint: _selectedDate == null
+                ? 'Primero selecciona fecha de retiro'
+                : 'Seleccionar fecha',
+          ),
+          const SizedBox(height: 16),
           const Text(
-            'Fecha de Retiro',
+            'Propósito (opcional)',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -340,56 +461,30 @@ class _CartScreenState extends State<CartScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          InkWell(
-            onTap: _selectPickupDate,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0F0F1E),
+          TextField(
+            controller: _purposeController,
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+            maxLines: 2,
+            decoration: InputDecoration(
+              hintText: 'Ej: Proyecto de construcción, mantenimiento...',
+              hintStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
+              filled: true,
+              fillColor: const Color(0xFF0F0F1E),
+              border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: _selectedDate != null
-                      ? const Color(0xFF7C3AED)
-                      : Colors.white.withOpacity(0.2),
-                  width: 2,
-                ),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.2), width: 2),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    color: _selectedDate != null
-                        ? const Color(0xFF7C3AED)
-                        : Colors.grey[600],
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    _selectedDate != null
-                        ? DateFormat('dd/MM/yyyy').format(_selectedDate!)
-                        : 'Seleccionar fecha',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: _selectedDate != null
-                          ? Colors.white
-                          : Colors.grey[600],
-                    ),
-                  ),
-                ],
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.2), width: 2),
               ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 2),
+              ),
+              contentPadding: const EdgeInsets.all(14),
             ),
           ),
-          if (_selectedDate != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                'Retiro programado para el ${DateFormat('EEEE d \'de\' MMMM', 'es').format(_selectedDate!)}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[400],
-                ),
-              ),
-            ),
         ],
       ),
     );

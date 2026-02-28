@@ -1,47 +1,73 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
-import '../models/material_model.dart'; // Tu modelo corregido
+import '../models/material_model.dart';
 import 'storage_service.dart';
 
 class MaterialService {
   final StorageService _storage = StorageService();
 
- Future<List<MaterialItem>> getMaterials() async {
+  Future<Map<String, String>> _authHeaders() async {
     final token = await _storage.getToken();
-    
-    if (token == null) {
-      print('No hay sesión iniciada');
-      return [];
-    }
-    
-    final url = Uri.parse('${ApiConfig.baseUrl}/materials/');
-    
+    return {
+      ...ApiConfig.headers,
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+  }
+
+  Future<List<MaterialItem>> getMaterials() async {
+    final headers = await _authHeaders();
+    final url = Uri.parse('${ApiConfig.baseUrl}/materials/materials/');
+
     try {
-      final response = await http.get(
-        url,
-        headers: {
-          ...ApiConfig.headers, // Copia los headers base
-          'Authorization': 'Bearer $token', // O 'Token $token'
-        },
-      );
+      final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
-        final List<dynamic> decodedData = jsonDecode(response.body);
-        return decodedData.map((json) => MaterialItem.fromJson(json)).toList();
+        final decoded = jsonDecode(response.body);
+        // DRF list returns array or paginated {results: [...]}
+        final List<dynamic> list =
+            decoded is List ? decoded : decoded['results'] ?? [];
+        return list.map((json) => MaterialItem.fromJson(json)).toList();
       } else {
-        print('Error Materiales: ${response.statusCode}');
         return [];
       }
     } catch (e) {
-      print('Error Materiales: $e');
       return [];
     }
   }
 
-  // Método futuro para buscar por QR
-  Future<MaterialItem?> getItemByQR(String qrCode, String token) async {
-    final url = Uri.parse('${ApiConfig.baseUrl}/items/by-qr/$qrCode/');
-    return null; // Placeholder
+  Future<MaterialItem?> getByQr(String qrCode) async {
+    final headers = await _authHeaders();
+    final url = Uri.parse(
+        '${ApiConfig.baseUrl}/materials/materials/search_by_qr/?qr_code=${Uri.encodeComponent(qrCode)}');
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return MaterialItem.fromJson(data);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<MaterialItem?> getById(int id) async {
+    final headers = await _authHeaders();
+    final url = Uri.parse('${ApiConfig.baseUrl}/materials/materials/$id/');
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return MaterialItem.fromJson(data);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 }
