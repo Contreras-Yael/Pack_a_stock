@@ -394,6 +394,7 @@ class _HomeScreenState extends State<HomeScreen>
         maxVal: (_activeLoans.length + 1).clamp(1, 20),
         color: AppPalette.accent,
         icon: Icons.inventory_2_outlined,
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoansScreen())),
       ),
       (
         label: 'Pendientes',
@@ -401,6 +402,7 @@ class _HomeScreenState extends State<HomeScreen>
         maxVal: (_pendingRequests + 1).clamp(1, 20),
         color: AppPalette.warning,
         icon: Icons.hourglass_top_rounded,
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryScreen())),
       ),
       (
         label: 'Vencidos',
@@ -412,6 +414,7 @@ class _HomeScreenState extends State<HomeScreen>
         icon: _overdueLoans.isEmpty
             ? Icons.check_circle_outline_rounded
             : Icons.warning_rounded,
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoansScreen())),
       ),
     ];
 
@@ -421,7 +424,9 @@ class _HomeScreenState extends State<HomeScreen>
         children: rings.map((r) {
           final idx = rings.indexOf(r);
           return Expanded(
-            child: Container(
+            child: GestureDetector(
+              onTap: r.onTap,
+              child: Container(
               margin: idx < rings.length - 1
                   ? const EdgeInsets.only(right: 10)
                   : EdgeInsets.zero,
@@ -482,6 +487,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ],
               ),
             ),
+          ),
           );
         }).toList(),
       ),
