@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/user_model.dart';
 import '../../services/auth_service.dart';
+import '../../config/app_colors.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final User user;
@@ -48,9 +49,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     if (result['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Perfil actualizado exitosamente'),
-          backgroundColor: Color(0xFF10B981),
+        SnackBar(
+          content: const Text('Perfil actualizado exitosamente'),
+          backgroundColor: AppPalette.success,
         ),
       );
       Navigator.pop(context, true); // true = data changed
@@ -62,10 +63,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1E),
+      backgroundColor: colors.bg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: colors.card,
+        foregroundColor: colors.text,
         title: const Text('Editar Perfil'),
         elevation: 0,
       ),
@@ -80,12 +83,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                      color: const Color(0xFF7C3AED), width: 3),
+                  border: Border.all(color: AppPalette.accent, width: 3),
                 ),
                 child: CircleAvatar(
                   radius: 50,
-                  backgroundColor: const Color(0xFF7C3AED).withOpacity(0.2),
+                  backgroundColor: AppPalette.accent.withOpacity(0.2),
                   child: Text(
                     _nameController.text.isNotEmpty
                         ? _nameController.text[0].toUpperCase()
@@ -93,7 +95,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     style: const TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF7C3AED),
+                      color: AppPalette.accent,
                     ),
                   ),
                 ),
@@ -102,10 +104,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 32),
 
             // Name field
-            const Text(
+            Text(
               'Nombre Completo',
               style: TextStyle(
-                color: Colors.white,
+                color: colors.text,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -113,34 +115,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 8),
             TextField(
               controller: _nameController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: colors.text),
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 hintText: 'Tu nombre completo',
-                hintStyle: TextStyle(color: Colors.grey[500]),
+                hintStyle: TextStyle(color: colors.textHint),
                 prefixIcon:
-                    const Icon(Icons.person_outline, color: Color(0xFF7C3AED)),
+                    const Icon(Icons.person_outline, color: AppPalette.accent),
                 filled: true,
-                fillColor: const Color(0xFF1A1A2E),
+                fillColor: colors.card,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 2),
+                  borderSide: const BorderSide(color: AppPalette.accent, width: 2),
                 ),
                 errorText: _error,
-                errorStyle: const TextStyle(color: Color(0xFFEF4444)),
+                errorStyle: const TextStyle(color: AppPalette.error),
               ),
             ),
             const SizedBox(height: 20),
 
             // Read-only email
-            const Text(
+            Text(
               'Correo Electrónico',
               style: TextStyle(
-                color: Colors.white,
+                color: colors.text,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -149,30 +151,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A2E),
+                color: colors.card,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.email_outlined,
-                      color: Colors.grey, size: 20),
+                  Icon(Icons.email_outlined, color: colors.textHint, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       widget.user.email,
-                      style:
-                          TextStyle(color: Colors.grey[400], fontSize: 15),
+                      style: TextStyle(color: colors.textSub, fontSize: 15),
                     ),
                   ),
-                  const Icon(Icons.lock_outline,
-                      color: Colors.grey, size: 16),
+                  Icon(Icons.lock_outline, color: colors.textHint, size: 16),
                 ],
               ),
             ),
             const SizedBox(height: 6),
             Text(
               'El correo no puede modificarse',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              style: TextStyle(color: colors.textHint, fontSize: 12),
             ),
 
             const SizedBox(height: 32),
@@ -184,7 +183,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: ElevatedButton(
                 onPressed: _saving ? null : _save,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7C3AED),
+                  backgroundColor: AppPalette.accent,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pack_a_stock/services/auth_service.dart';
 import '../../services/notification_service.dart';
+import '../../config/app_colors.dart';
 import '../home/home_screen.dart';
 import 'register_screen.dart';
 
@@ -59,8 +60,9 @@ class _PantallaLoginState extends State<PantallaLogin> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1E),
+      backgroundColor: colors.bg,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -70,35 +72,35 @@ class _PantallaLoginState extends State<PantallaLogin> {
               children: [
                 // Logo
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF7C3AED), Color(0xFFA855F7)],
+                      colors: [AppPalette.accent, AppPalette.accentLight],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Icon(
-                    Icons.inventory_2,
-                    color: Colors.white,
-                    size: 48,
+                  child: Image.asset(
+                    'assets/images/iconoblanco.png',
+                    width: 52,
+                    height: 52,
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'Pack-a-Stock',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: colors.text,
                     letterSpacing: -0.5,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'Sistema de Gestión de Préstamos',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                  style: TextStyle(fontSize: 14, color: colors.textSub),
                 ),
                 const SizedBox(height: 40),
 
@@ -106,22 +108,21 @@ class _PantallaLoginState extends State<PantallaLogin> {
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: colors.text),
                   decoration: InputDecoration(
                     labelText: 'Correo electrónico',
-                    labelStyle: TextStyle(color: Colors.grey[400]),
+                    labelStyle: TextStyle(color: colors.textHint),
                     prefixIcon: const Icon(Icons.email_outlined,
-                        color: Color(0xFF7C3AED)),
+                        color: AppPalette.accent),
                     filled: true,
-                    fillColor: const Color(0xFF1A1A2E),
+                    fillColor: colors.card,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          const BorderSide(color: Color(0xFF7C3AED), width: 2),
+                      borderSide: const BorderSide(color: AppPalette.accent, width: 2),
                     ),
                   ),
                 ),
@@ -131,33 +132,32 @@ class _PantallaLoginState extends State<PantallaLogin> {
                 TextField(
                   controller: _passController,
                   obscureText: _obscurePassword,
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: colors.text),
                   onSubmitted: (_) => _handleLogin(),
                   decoration: InputDecoration(
                     labelText: 'Contraseña',
-                    labelStyle: TextStyle(color: Colors.grey[400]),
+                    labelStyle: TextStyle(color: colors.textHint),
                     prefixIcon: const Icon(Icons.lock_outlined,
-                        color: Color(0xFF7C3AED)),
+                        color: AppPalette.accent),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
-                        color: Colors.grey[400],
+                        color: colors.textHint,
                       ),
                       onPressed: () =>
                           setState(() => _obscurePassword = !_obscurePassword),
                     ),
                     filled: true,
-                    fillColor: const Color(0xFF1A1A2E),
+                    fillColor: colors.card,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          const BorderSide(color: Color(0xFF7C3AED), width: 2),
+                      borderSide: const BorderSide(color: AppPalette.accent, width: 2),
                     ),
                   ),
                 ),
@@ -169,21 +169,20 @@ class _PantallaLoginState extends State<PantallaLogin> {
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEF4444).withOpacity(0.1),
+                      color: AppPalette.error.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                          color: const Color(0xFFEF4444).withOpacity(0.4)),
+                      border: Border.all(color: AppPalette.error.withOpacity(0.4)),
                     ),
                     child: Row(
                       children: [
                         const Icon(Icons.error_outline,
-                            color: Color(0xFFEF4444), size: 20),
+                            color: AppPalette.error, size: 20),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             _message,
                             style: const TextStyle(
-                                color: Color(0xFFEF4444), fontSize: 13),
+                                color: AppPalette.error, fontSize: 13),
                           ),
                         ),
                       ],
@@ -196,12 +195,11 @@ class _PantallaLoginState extends State<PantallaLogin> {
                   height: 54,
                   child: _isLoading
                       ? const Center(
-                          child: CircularProgressIndicator(
-                              color: Color(0xFF7C3AED)))
+                          child: CircularProgressIndicator(color: AppPalette.accent))
                       : ElevatedButton(
                           onPressed: _handleLogin,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF7C3AED),
+                            backgroundColor: AppPalette.accent,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -222,7 +220,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text('¿No tienes cuenta?',
-                        style: TextStyle(color: Colors.grey[400])),
+                        style: TextStyle(color: colors.textSub)),
                     TextButton(
                       onPressed: () {
                         Navigator.push(
@@ -234,7 +232,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
                       child: const Text(
                         'Registrarse',
                         style: TextStyle(
-                          color: Color(0xFF7C3AED),
+                          color: AppPalette.accent,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

@@ -15,6 +15,7 @@ import '../../services/cart_service.dart';
 import '../../models/order_model.dart';
 import '../../models/loan_model.dart';
 import '../../models/user_model.dart';
+import '../../config/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -88,16 +89,16 @@ class _HomeScreenState extends State<HomeScreen>
       (_overdueLoans.isEmpty ? 100 : (100 - _overdueLoans.length * 20).clamp(0, 100));
 
   // Time-based gradient
-  List<Color> get _heroGradient {
+  List<Color> _heroGradient(AppColors colors) {
     final h = DateTime.now().hour;
     if (h >= 5 && h < 12) {
       return [const Color(0xFF78350F), const Color(0xFF1C1625)]; // mañana — ámbar
     } else if (h >= 12 && h < 17) {
-      return [const Color(0xFF1E3A5F), const Color(0xFF0F0F1E)]; // tarde — azul
+      return [const Color(0xFF1E3A5F), colors.gradientEnd]; // tarde — azul
     } else if (h >= 17 && h < 21) {
-      return [const Color(0xFF3B0764), const Color(0xFF1A1A2E)]; // noche — púrpura
+      return [const Color(0xFF3B0764), colors.card]; // noche — púrpura
     } else {
-      return [const Color(0xFF0F172A), const Color(0xFF0F0F1E)]; // madrugada — índigo
+      return [const Color(0xFF0F172A), colors.gradientEnd]; // madrugada — índigo
     }
   }
 
@@ -116,25 +117,26 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Color get _trustColor {
-    if (_trustScore >= 90) return const Color(0xFF10B981);
-    if (_trustScore >= 70) return const Color(0xFF3B82F6);
-    if (_trustScore >= 40) return const Color(0xFFF59E0B);
-    return const Color(0xFFEF4444);
+    if (_trustScore >= 90) return AppPalette.success;
+    if (_trustScore >= 70) return AppPalette.info;
+    if (_trustScore >= 40) return AppPalette.warning;
+    return AppPalette.error;
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1E),
+      backgroundColor: colors.bg,
       drawer: const AppDrawer(currentRoute: 'home'),
       body: RefreshIndicator(
         onRefresh: _loadData,
-        color: const Color(0xFF7C3AED),
-        backgroundColor: const Color(0xFF1A1A2E),
+        color: AppPalette.accent,
+        backgroundColor: colors.card,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            _buildHero(),
+            _buildHero(colors),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
               sliver: SliverList(
@@ -144,40 +146,40 @@ class _HomeScreenState extends State<HomeScreen>
                     _buildPenaltyBanner(),
                     const SizedBox(height: 16),
                   ],
-                  _buildScanButton(),
+                  _buildScanButton(colors),
                   const SizedBox(height: 24),
                   if (_loading)
-                    const Center(
+                    Center(
                         child: CircularProgressIndicator(
-                            color: Color(0xFF7C3AED), strokeWidth: 2))
+                            color: AppPalette.accent, strokeWidth: 2))
                   else ...[
-                    _buildAnimatedRings(),
+                    _buildAnimatedRings(colors),
                     if (_overdueLoans.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       _buildOverdueBanner(),
                     ],
                     if (_activeLoans.isNotEmpty) ...[
                       const SizedBox(height: 28),
-                      _buildSectionTitle('Préstamos activos', onTap: () {
+                      _buildSectionTitle('Préstamos activos', colors, onTap: () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (_) => const LoansScreen()));
                       }),
                       const SizedBox(height: 14),
-                      _buildLoanCards(),
+                      _buildLoanCards(colors),
                     ],
                     const SizedBox(height: 28),
-                    _buildSectionTitle('Solicitudes recientes', onTap: () {
+                    _buildSectionTitle('Solicitudes recientes', colors, onTap: () {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (_) => const HistoryScreen()));
                     }),
                     const SizedBox(height: 12),
-                    _buildRecentOrders(),
+                    _buildRecentOrders(colors),
                     const SizedBox(height: 28),
-                    _buildQuickActions(),
+                    _buildQuickActions(colors),
                   ],
                 ]),
               ),
@@ -189,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // ── Hero ──────────────────────────────────────────────────────────────────
-  Widget _buildHero() {
+  Widget _buildHero(AppColors colors) {
     final firstName = _user?.fullName.split(' ').first ?? 'Empleado';
     final today = DateFormat("EEEE, d 'de' MMMM", 'es').format(DateTime.now());
 
@@ -197,10 +199,10 @@ class _HomeScreenState extends State<HomeScreen>
       expandedHeight: 180,
       floating: false,
       pinned: true,
-      backgroundColor: const Color(0xFF1A1A2E),
+      backgroundColor: colors.card,
       leading: Builder(
         builder: (ctx) => IconButton(
-          icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 26),
+          icon: Icon(Icons.menu_rounded, color: colors.text, size: 26),
           onPressed: () => Scaffold.of(ctx).openDrawer(),
         ),
       ),
@@ -220,11 +222,11 @@ class _HomeScreenState extends State<HomeScreen>
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.12),
+                        color: colors.text.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.notifications_outlined,
-                          color: Colors.white, size: 22),
+                      child: Icon(Icons.notifications_outlined,
+                          color: colors.text, size: 22),
                     ),
                     if (count > 0)
                       Positioned(
@@ -233,7 +235,7 @@ class _HomeScreenState extends State<HomeScreen>
                         child: Container(
                           padding: const EdgeInsets.all(3),
                           decoration: const BoxDecoration(
-                              color: Color(0xFFEF4444),
+                              color: AppPalette.error,
                               shape: BoxShape.circle),
                           constraints: const BoxConstraints(
                               minWidth: 16, minHeight: 16),
@@ -258,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen>
           duration: const Duration(milliseconds: 500),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: _heroGradient,
+              colors: _heroGradient(colors),
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -282,15 +284,26 @@ class _HomeScreenState extends State<HomeScreen>
                           fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      firstName,
-                      style: const TextStyle(
+                    const Text(
+                      '',
+                      style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         height: 1.1,
                       ),
                     ),
+                    Builder(builder: (_) {
+                      return Text(
+                        firstName,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          height: 1.1,
+                        ),
+                      );
+                    }),
                     const SizedBox(height: 4),
                     Text(
                       today,
@@ -373,20 +386,20 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // ── Animated rings row ────────────────────────────────────────────────────
-  Widget _buildAnimatedRings() {
+  Widget _buildAnimatedRings(AppColors colors) {
     final rings = [
       (
         label: 'Activos',
         value: _activeLoans.length,
         maxVal: (_activeLoans.length + 1).clamp(1, 20),
-        color: const Color(0xFF7C3AED),
+        color: AppPalette.accent,
         icon: Icons.inventory_2_outlined,
       ),
       (
         label: 'Pendientes',
         value: _pendingRequests,
         maxVal: (_pendingRequests + 1).clamp(1, 20),
-        color: const Color(0xFFF59E0B),
+        color: AppPalette.warning,
         icon: Icons.hourglass_top_rounded,
       ),
       (
@@ -394,8 +407,8 @@ class _HomeScreenState extends State<HomeScreen>
         value: _overdueLoans.length,
         maxVal: (_overdueLoans.length + 1).clamp(1, 20),
         color: _overdueLoans.isEmpty
-            ? const Color(0xFF10B981)
-            : const Color(0xFFEF4444),
+            ? AppPalette.success
+            : AppPalette.error,
         icon: _overdueLoans.isEmpty
             ? Icons.check_circle_outline_rounded
             : Icons.warning_rounded,
@@ -414,7 +427,7 @@ class _HomeScreenState extends State<HomeScreen>
                   : EdgeInsets.zero,
               padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A2E),
+                color: colors.card,
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: r.color.withOpacity(0.2)),
               ),
@@ -463,7 +476,7 @@ class _HomeScreenState extends State<HomeScreen>
                     r.label,
                     style: TextStyle(
                         fontSize: 11,
-                        color: Colors.grey[400],
+                        color: colors.textSub,
                         fontWeight: FontWeight.w500),
                   ),
                 ],
@@ -476,18 +489,18 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // ── Loan cards carousel ───────────────────────────────────────────────────
-  Widget _buildLoanCards() {
+  Widget _buildLoanCards(AppColors colors) {
     return SizedBox(
       height: 140,
       child: PageView.builder(
         controller: PageController(viewportFraction: 0.88),
         itemCount: _activeLoans.length,
-        itemBuilder: (_, i) => _buildLoanCard(_activeLoans[i], i),
+        itemBuilder: (_, i) => _buildLoanCard(_activeLoans[i], i, colors),
       ),
     );
   }
 
-  Widget _buildLoanCard(Loan loan, int idx) {
+  Widget _buildLoanCard(Loan loan, int idx, AppColors colors) {
     final diff = loan.expectedReturnDate.difference(DateTime.now());
     final totalDiff =
         loan.expectedReturnDate.difference(loan.issuedAt);
@@ -528,7 +541,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             borderRadius: BorderRadius.circular(20),
             border:
-                Border.all(color: Colors.white.withOpacity(0.08)),
+                Border.all(color: colors.border),
             boxShadow: [
               BoxShadow(
                 color: c2.withOpacity(0.5),
@@ -608,9 +621,9 @@ class _HomeScreenState extends State<HomeScreen>
                             Colors.white.withOpacity(0.15),
                         valueColor: AlwaysStoppedAnimation(
                           diff.isNegative
-                              ? const Color(0xFFEF4444)
+                              ? AppPalette.error
                               : diff.inDays <= 2
-                                  ? const Color(0xFFF59E0B)
+                                  ? AppPalette.warning
                                   : Colors.white,
                         ),
                         strokeCap: StrokeCap.round,
@@ -630,7 +643,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // ── Scan button ───────────────────────────────────────────────────────────
-  Widget _buildScanButton() {
+  Widget _buildScanButton(AppColors colors) {
     final blocked = _isBlocked;
     return GestureDetector(
       onTap: () {
@@ -653,7 +666,7 @@ class _HomeScreenState extends State<HomeScreen>
               ? const LinearGradient(
                   colors: [Color(0xFF374151), Color(0xFF4B5563)])
               : const LinearGradient(
-                  colors: [Color(0xFF7C3AED), Color(0xFF9333EA)],
+                  colors: [AppPalette.accent, Color(0xFF9333EA)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -662,7 +675,7 @@ class _HomeScreenState extends State<HomeScreen>
               ? []
               : [
                   BoxShadow(
-                    color: const Color(0xFF7C3AED).withOpacity(0.4),
+                    color: AppPalette.accent.withOpacity(0.4),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -807,26 +820,26 @@ class _HomeScreenState extends State<HomeScreen>
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFFEF4444).withOpacity(0.1),
+          color: AppPalette.error.withOpacity(0.1),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.4)),
+          border: Border.all(color: AppPalette.error.withOpacity(0.4)),
         ),
         child: Row(
           children: [
             const Icon(Icons.warning_rounded,
-                color: Color(0xFFEF4444), size: 18),
+                color: AppPalette.error, size: 18),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 'Tienes $count préstamo${count > 1 ? 's' : ''} vencido${count > 1 ? 's' : ''}. Devuelve los materiales.',
                 style: const TextStyle(
-                    color: Color(0xFFEF4444),
+                    color: AppPalette.error,
                     fontSize: 13,
                     fontWeight: FontWeight.w500),
               ),
             ),
             const Icon(Icons.chevron_right_rounded,
-                color: Color(0xFFEF4444), size: 18),
+                color: AppPalette.error, size: 18),
           ],
         ),
       ),
@@ -834,22 +847,22 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // ── Section title ─────────────────────────────────────────────────────────
-  Widget _buildSectionTitle(String title, {VoidCallback? onTap}) {
+  Widget _buildSectionTitle(String title, AppColors colors, {VoidCallback? onTap}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(title,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.white)),
+                color: colors.text)),
         if (onTap != null)
           GestureDetector(
             onTap: onTap,
             child: const Text('Ver todo',
                 style: TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF7C3AED),
+                    color: AppPalette.accent,
                     fontWeight: FontWeight.w500)),
           ),
       ],
@@ -857,22 +870,22 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // ── Recent orders ─────────────────────────────────────────────────────────
-  Widget _buildRecentOrders() {
+  Widget _buildRecentOrders(AppColors colors) {
     if (_recentOrders.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: colors.card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withOpacity(0.07)),
+          border: Border.all(color: colors.border),
         ),
         child: Center(
           child: Column(
             children: [
-              Icon(Icons.inbox_outlined, size: 32, color: Colors.grey[600]),
+              Icon(Icons.inbox_outlined, size: 32, color: colors.textHint),
               const SizedBox(height: 8),
               Text('Sin solicitudes recientes',
-                  style: TextStyle(color: Colors.grey[400], fontSize: 13)),
+                  style: TextStyle(color: colors.textSub, fontSize: 13)),
             ],
           ),
         ),
@@ -892,9 +905,9 @@ class _HomeScreenState extends State<HomeScreen>
             padding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A2E),
+              color: colors.card,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white.withOpacity(0.06)),
+              border: Border.all(color: colors.border),
             ),
             child: Row(
               children: [
@@ -910,15 +923,15 @@ class _HomeScreenState extends State<HomeScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(title,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white),
+                              color: colors.text),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis),
                       Text(time,
                           style: TextStyle(
-                              fontSize: 11, color: Colors.grey[500])),
+                              fontSize: 11, color: colors.textHint)),
                     ],
                   ),
                 ),
@@ -943,7 +956,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // ── Quick actions ─────────────────────────────────────────────────────────
-  Widget _buildQuickActions() {
+  Widget _buildQuickActions(AppColors colors) {
     final blocked = _isBlocked;
     return ListenableBuilder(
       listenable: CartService(),
@@ -957,7 +970,7 @@ class _HomeScreenState extends State<HomeScreen>
             label: 'Carrito',
             color: blocked
                 ? const Color(0xFF6B7280)
-                : const Color(0xFF10B981),
+                : AppPalette.success,
             badge: (!blocked && cartCount > 0) ? cartCount : 0,
             onTap: () {
               if (blocked) {
@@ -976,7 +989,7 @@ class _HomeScreenState extends State<HomeScreen>
           (
             icon: Icons.history_rounded,
             label: 'Historial',
-            color: const Color(0xFF3B82F6),
+            color: AppPalette.info,
             badge: 0,
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const HistoryScreen())),
@@ -984,7 +997,7 @@ class _HomeScreenState extends State<HomeScreen>
           (
             icon: Icons.swap_horiz_rounded,
             label: 'Préstamos',
-            color: const Color(0xFF7C3AED),
+            color: AppPalette.accent,
             badge: 0,
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const LoansScreen())),
@@ -1004,10 +1017,9 @@ class _HomeScreenState extends State<HomeScreen>
                       : EdgeInsets.zero,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1A1A2E),
+                    color: colors.card,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                        color: Colors.white.withOpacity(0.07)),
+                    border: Border.all(color: colors.border),
                   ),
                   child: Column(
                     children: [
@@ -1023,7 +1035,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 width: 16,
                                 height: 16,
                                 decoration: const BoxDecoration(
-                                    color: Color(0xFFEF4444),
+                                    color: AppPalette.error,
                                     shape: BoxShape.circle),
                                 child: Center(
                                   child: Text('${a.badge}',
@@ -1040,7 +1052,7 @@ class _HomeScreenState extends State<HomeScreen>
                       Text(a.label,
                           style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[300],
+                              color: colors.textSub,
                               fontWeight: FontWeight.w500)),
                     ],
                   ),
@@ -1056,10 +1068,10 @@ class _HomeScreenState extends State<HomeScreen>
   // ── Helpers ───────────────────────────────────────────────────────────────
   Map<String, dynamic> _statusInfo(String status) {
     const map = {
-      'pending': {'label': 'Pendiente', 'color': Color(0xFFF59E0B)},
-      'approved': {'label': 'Aprobado', 'color': Color(0xFF3B82F6)},
-      'rejected': {'label': 'Rechazado', 'color': Color(0xFFEF4444)},
-      'completed': {'label': 'Completado', 'color': Color(0xFF10B981)},
+      'pending': {'label': 'Pendiente', 'color': AppPalette.warning},
+      'approved': {'label': 'Aprobado', 'color': AppPalette.info},
+      'rejected': {'label': 'Rechazado', 'color': AppPalette.error},
+      'completed': {'label': 'Completado', 'color': AppPalette.success},
       'returned': {'label': 'Devuelto', 'color': Color(0xFF6B7280)},
       'cancelled': {'label': 'Cancelado', 'color': Color(0xFF9CA3AF)},
     };

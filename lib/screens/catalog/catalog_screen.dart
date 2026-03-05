@@ -4,6 +4,7 @@ import '../../services/material_service.dart';
 import '../../services/favorites_service.dart';
 import '../../widgets/app_drawer.dart';
 import '../material/material_detail_screen.dart';
+import '../../config/app_colors.dart';
 
 // ─── Shimmer pulse widget ────────────────────────────────────────────────────
 
@@ -47,6 +48,7 @@ class _ShimmerBoxState extends State<_ShimmerBox>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return AnimatedBuilder(
       animation: _anim,
       builder: (_, __) => Opacity(
@@ -55,7 +57,7 @@ class _ShimmerBoxState extends State<_ShimmerBox>
           height: widget.height,
           width: widget.width,
           decoration: BoxDecoration(
-            color: const Color(0xFF2A2A3E),
+            color: colors.shimmer,
             borderRadius: widget.borderRadius ?? BorderRadius.circular(6),
           ),
         ),
@@ -176,49 +178,50 @@ class _CatalogScreenState extends State<CatalogScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1E),
+      backgroundColor: colors.bg,
       drawer: const AppDrawer(currentRoute: 'catalog'),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Catálogo'),
+        backgroundColor: colors.card,
+        title: Text('Catálogo', style: TextStyle(color: colors.text)),
         elevation: 0,
         actions: [
-          _buildSortButton(),
+          _buildSortButton(colors),
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
+            icon: Icon(Icons.refresh_rounded, color: colors.text),
             onPressed: _loadMaterials,
           ),
         ],
       ),
       body: Column(
         children: [
-          _buildSearchBar(),
-          _buildFilterChips(),
-          _buildResultCount(),
-          Expanded(child: _buildGrid()),
+          _buildSearchBar(colors),
+          _buildFilterChips(colors),
+          _buildResultCount(colors),
+          Expanded(child: _buildGrid(colors)),
         ],
       ),
     );
   }
 
   // ── Search bar ─────────────────────────────────────────────────────────────
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(AppColors colors) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: TextField(
         controller: _searchController,
         onChanged: (_) => _applyFilters(),
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: TextStyle(color: colors.text, fontSize: 14),
         decoration: InputDecoration(
           hintText: 'Buscar por nombre, SKU, categoría...',
-          hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
+          hintStyle: TextStyle(color: colors.textHint, fontSize: 14),
           prefixIcon: const Icon(Icons.search_rounded,
-              color: Color(0xFF7C3AED), size: 20),
+              color: AppPalette.accent, size: 20),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.close_rounded,
-                      color: Colors.grey, size: 18),
+                  icon: Icon(Icons.close_rounded,
+                      color: colors.textHint, size: 18),
                   onPressed: () {
                     _searchController.clear();
                     _applyFilters();
@@ -226,7 +229,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                 )
               : null,
           filled: true,
-          fillColor: const Color(0xFF1A1A2E),
+          fillColor: colors.card,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide.none,
@@ -234,7 +237,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide:
-                const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
+                const BorderSide(color: AppPalette.accent, width: 1.5),
           ),
           contentPadding: const EdgeInsets.symmetric(vertical: 12),
         ),
@@ -243,7 +246,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
   }
 
   // ── Filter chips ───────────────────────────────────────────────────────────
-  Widget _buildFilterChips() {
+  Widget _buildFilterChips(AppColors colors) {
     return SizedBox(
       height: 40,
       child: ListView(
@@ -252,6 +255,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
         children: [
           _chip('Todos',
               _statusFilter == _StatusFilter.all && _categoryFilter == null,
+              colors: colors,
               onTap: () => setState(() {
                     _statusFilter = _StatusFilter.all;
                     _categoryFilter = null;
@@ -262,7 +266,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
             builder: (_, __) => _chip(
               'Favoritos',
               _statusFilter == _StatusFilter.favorites,
-              color: const Color(0xFFF59E0B),
+              colors: colors,
+              color: AppPalette.warning,
               icon: Icons.star_rounded,
               onTap: () => setState(() {
                 _statusFilter = _statusFilter == _StatusFilter.favorites
@@ -274,21 +279,24 @@ class _CatalogScreenState extends State<CatalogScreen> {
             ),
           ),
           _chip('Disponibles', _statusFilter == _StatusFilter.available,
-              color: const Color(0xFF10B981),
+              colors: colors,
+              color: AppPalette.success,
               onTap: () => setState(() {
                     _statusFilter = _StatusFilter.available;
                     _categoryFilter = null;
                     _applyFilters();
                   })),
           _chip('No disponibles', _statusFilter == _StatusFilter.unavailable,
-              color: const Color(0xFFEF4444),
+              colors: colors,
+              color: AppPalette.error,
               onTap: () => setState(() {
                     _statusFilter = _StatusFilter.unavailable;
                     _categoryFilter = null;
                     _applyFilters();
                   })),
           _chip('Consumibles', _statusFilter == _StatusFilter.consumable,
-              color: const Color(0xFFF59E0B),
+              colors: colors,
+              color: AppPalette.warning,
               onTap: () => setState(() {
                     _statusFilter = _StatusFilter.consumable;
                     _categoryFilter = null;
@@ -296,7 +304,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   })),
           if (_allMaterials.any((m) => m.isLowStock))
             _chip('Stock bajo', _statusFilter == _StatusFilter.lowStock,
-                color: const Color(0xFFEF4444),
+                colors: colors,
+                color: AppPalette.error,
                 icon: Icons.warning_amber_rounded,
                 onTap: () => setState(() {
                       _statusFilter = _StatusFilter.lowStock;
@@ -307,12 +316,13 @@ class _CatalogScreenState extends State<CatalogScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
               child: VerticalDivider(
-                  color: Colors.white.withOpacity(0.15), width: 1),
+                  color: colors.border, width: 1),
             ),
           ..._categories.map((cat) => _chip(
                 cat,
                 _categoryFilter == cat,
-                color: const Color(0xFF3B82F6),
+                colors: colors,
+                color: AppPalette.info,
                 onTap: () => setState(() {
                   _categoryFilter = _categoryFilter == cat ? null : cat;
                   _statusFilter = _StatusFilter.all;
@@ -327,7 +337,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
   Widget _chip(
     String label,
     bool selected, {
-    Color color = const Color(0xFF7C3AED),
+    required AppColors colors,
+    Color color = AppPalette.accent,
     IconData? icon,
     required VoidCallback onTap,
   }) {
@@ -340,10 +351,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
             horizontal: icon != null ? 10 : 14, vertical: 6),
         decoration: BoxDecoration(
           color:
-              selected ? color.withOpacity(0.2) : const Color(0xFF1A1A2E),
+              selected ? color.withOpacity(0.2) : colors.card,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? color : Colors.white.withOpacity(0.1),
+            color: selected ? color : colors.border,
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -352,7 +363,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           children: [
             if (icon != null) ...[
               Icon(icon,
-                  size: 13, color: selected ? color : Colors.grey[500]),
+                  size: 13, color: selected ? color : colors.textHint),
               const SizedBox(width: 4),
             ],
             Text(
@@ -360,7 +371,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                color: selected ? color : Colors.grey[400],
+                color: selected ? color : colors.textSub,
               ),
             ),
           ],
@@ -370,7 +381,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
   }
 
   // ── Sort popup ─────────────────────────────────────────────────────────────
-  Widget _buildSortButton() {
+  Widget _buildSortButton(AppColors colors) {
     const options = {
       _SortOption.nameAsc: 'A → Z',
       _SortOption.nameDesc: 'Z → A',
@@ -378,8 +389,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
       _SortOption.stockAsc: 'Menos stock',
     };
     return PopupMenuButton<_SortOption>(
-      icon: const Icon(Icons.sort_rounded),
-      color: const Color(0xFF1A1A2E),
+      icon: Icon(Icons.sort_rounded, color: colors.text),
+      color: colors.card,
       shape:
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (opt) {
@@ -393,12 +404,12 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   children: [
                     if (_sortOption == e.key)
                       const Icon(Icons.check,
-                          size: 16, color: Color(0xFF7C3AED))
+                          size: 16, color: AppPalette.accent)
                     else
                       const SizedBox(width: 16),
                     const SizedBox(width: 8),
                     Text(e.value,
-                        style: const TextStyle(color: Colors.white)),
+                        style: TextStyle(color: colors.text)),
                   ],
                 ),
               ))
@@ -407,7 +418,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
   }
 
   // ── Result count + clear ───────────────────────────────────────────────────
-  Widget _buildResultCount() {
+  Widget _buildResultCount(AppColors colors) {
     if (_loading) return const SizedBox.shrink();
     final hasFilters = _statusFilter != _StatusFilter.all ||
         _categoryFilter != null ||
@@ -418,7 +429,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
         children: [
           Text(
             '${_filtered.length} resultado${_filtered.length == 1 ? '' : 's'}',
-            style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+            style: TextStyle(fontSize: 12, color: colors.textHint),
           ),
           if (hasFilters) ...[
             const SizedBox(width: 10),
@@ -435,12 +446,12 @@ class _CatalogScreenState extends State<CatalogScreen> {
               child: const Row(
                 children: [
                   Icon(Icons.close_rounded,
-                      size: 12, color: Color(0xFF7C3AED)),
+                      size: 12, color: AppPalette.accent),
                   SizedBox(width: 3),
                   Text('Limpiar',
                       style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF7C3AED),
+                          color: AppPalette.accent,
                           fontWeight: FontWeight.w500)),
                 ],
               ),
@@ -463,14 +474,15 @@ class _CatalogScreenState extends State<CatalogScreen> {
         childAspectRatio: 0.72,
       ),
       itemCount: 6,
-      itemBuilder: (context, index) => _buildSkeletonCard(),
+      itemBuilder: (context, index) => _buildSkeletonCard(context),
     );
   }
 
-  Widget _buildSkeletonCard() {
+  Widget _buildSkeletonCard(BuildContext context) {
+    final colors = context.colors;
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
       ),
       clipBehavior: Clip.antiAlias,
@@ -506,7 +518,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
   }
 
   // ── Grid ───────────────────────────────────────────────────────────────────
-  Widget _buildGrid() {
+  Widget _buildGrid(AppColors colors) {
     if (_loading) {
       return _buildSkeletonGrid();
     }
@@ -515,7 +527,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off_rounded, size: 64, color: Colors.grey[700]),
+            Icon(Icons.search_off_rounded, size: 64, color: colors.textHint),
             const SizedBox(height: 16),
             Text(
               _searchController.text.isNotEmpty ||
@@ -523,7 +535,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       _categoryFilter != null
                   ? 'Sin resultados para este filtro'
                   : 'No hay materiales disponibles',
-              style: TextStyle(fontSize: 15, color: Colors.grey[500]),
+              style: TextStyle(fontSize: 15, color: colors.textHint),
             ),
           ],
         ),
@@ -532,7 +544,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
 
     return RefreshIndicator(
       onRefresh: _loadMaterials,
-      color: const Color(0xFF7C3AED),
+      color: AppPalette.accent,
       child: GridView.builder(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -542,16 +554,16 @@ class _CatalogScreenState extends State<CatalogScreen> {
           childAspectRatio: 0.72,
         ),
         itemCount: _filtered.length,
-        itemBuilder: (context, index) => _buildCard(_filtered[index]),
+        itemBuilder: (context, index) => _buildCard(_filtered[index], colors),
       ),
     );
   }
 
   // ── Card ───────────────────────────────────────────────────────────────────
-  Widget _buildCard(MaterialItem m) {
+  Widget _buildCard(MaterialItem m, AppColors colors) {
     final available = m.isAvailable;
     final statusColor =
-        available ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+        available ? AppPalette.success : AppPalette.error;
 
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -561,12 +573,12 @@ class _CatalogScreenState extends State<CatalogScreen> {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: colors.card,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: m.isLowStock
-                ? const Color(0xFFF59E0B).withOpacity(0.35)
-                : Colors.white.withOpacity(0.07),
+                ? AppPalette.warning.withOpacity(0.35)
+                : colors.border,
           ),
         ),
         clipBehavior: Clip.antiAlias,
@@ -583,9 +595,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       ? Image.network(
                           m.imageUrl!,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _placeholder(),
+                          errorBuilder: (_, __, ___) => _placeholder(colors),
                         )
-                      : _placeholder(),
+                      : _placeholder(colors),
 
                   // Gradient at bottom of image
                   Positioned(
@@ -599,8 +611,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
                           colors: [
-                            const Color(0xFF1A1A2E),
-                            const Color(0xFF1A1A2E).withOpacity(0),
+                            colors.card,
+                            colors.card.withOpacity(0),
                           ],
                         ),
                       ),
@@ -638,8 +650,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           color: m.isLowStock
-                              ? const Color(0xFFF59E0B).withOpacity(0.9)
-                              : const Color(0xFF3B82F6).withOpacity(0.9),
+                              ? AppPalette.warning.withOpacity(0.9)
+                              : AppPalette.info.withOpacity(0.9),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Icon(
@@ -666,7 +678,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                             padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(
                               color: isFav
-                                  ? const Color(0xFFF59E0B).withOpacity(0.9)
+                                  ? AppPalette.warning.withOpacity(0.9)
                                   : Colors.black.withOpacity(0.45),
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -694,8 +706,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   children: [
                     Text(
                       m.name,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: colors.text,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         height: 1.2,
@@ -709,7 +721,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       Text(
                         m.categoryName!,
                         style: TextStyle(
-                            color: Colors.grey[500], fontSize: 10),
+                            color: colors.textHint, fontSize: 10),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -718,14 +730,14 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     Row(
                       children: [
                         Icon(Icons.inventory_2_outlined,
-                            size: 11, color: Colors.grey[500]),
+                            size: 11, color: colors.textHint),
                         const SizedBox(width: 4),
                         Text(
                           '${m.availableQuantity} disponibles',
                           style: TextStyle(
                             color: available
-                                ? const Color(0xFF10B981)
-                                : Colors.grey[600],
+                                ? AppPalette.success
+                                : colors.textHint,
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                           ),
@@ -742,14 +754,14 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
-  Widget _placeholder() {
+  Widget _placeholder(AppColors colors) {
     return Container(
-      color: const Color(0xFF0F0F1E),
+      color: colors.bg,
       child: Center(
         child: Icon(
           Icons.inventory_2_outlined,
           size: 42,
-          color: const Color(0xFF7C3AED).withOpacity(0.25),
+          color: AppPalette.accent.withOpacity(0.25),
         ),
       ),
     );

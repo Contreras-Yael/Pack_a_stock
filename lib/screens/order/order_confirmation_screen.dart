@@ -5,6 +5,7 @@ import '../../models/cart_item_model.dart';
 import '../../models/order_model.dart';
 import '../../services/cart_service.dart';
 import '../../services/order_service.dart';
+import '../../config/app_colors.dart';
 
 class OrderConfirmationScreen extends StatefulWidget {
   final List<CartItem> cartItems;
@@ -76,35 +77,36 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1E),
+      backgroundColor: colors.bg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Confirmación de Pedido'),
+        backgroundColor: colors.card,
+        title: Text('Confirmación de Pedido', style: TextStyle(color: colors.text)),
         elevation: 0,
         automaticallyImplyLeading: _submitted || _errorMessage.isNotEmpty,
       ),
       body: _isSubmitting
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: Color(0xFF7C3AED)),
-                  SizedBox(height: 20),
+                  const CircularProgressIndicator(color: AppPalette.accent),
+                  const SizedBox(height: 20),
                   Text(
                     'Enviando solicitud...',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    style: TextStyle(color: colors.text, fontSize: 16),
                   ),
                 ],
               ),
             )
           : _errorMessage.isNotEmpty
-              ? _buildErrorView()
-              : _buildSuccessView(),
+              ? _buildErrorView(colors)
+              : _buildSuccessView(colors),
     );
   }
 
-  Widget _buildErrorView() {
+  Widget _buildErrorView(AppColors colors) {
     return Padding(
       padding: const EdgeInsets.all(28),
       child: Column(
@@ -113,22 +115,22 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFFEF4444).withOpacity(0.1),
+              color: AppPalette.error.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.error_outline,
-                color: Color(0xFFEF4444), size: 56),
+                color: AppPalette.error, size: 56),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Error al enviar',
             style: TextStyle(
-                fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                fontSize: 22, fontWeight: FontWeight.bold, color: colors.text),
           ),
           const SizedBox(height: 12),
           Text(
             _errorMessage,
-            style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+            style: TextStyle(fontSize: 14, color: colors.textSub),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -138,7 +140,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             child: ElevatedButton(
               onPressed: _retry,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7C3AED),
+                backgroundColor: AppPalette.accent,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
@@ -157,8 +159,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               onPressed: () =>
                   Navigator.of(context).popUntil((route) => route.isFirst),
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white70,
-                side: const BorderSide(color: Colors.white24),
+                foregroundColor: colors.textSub,
+                side: BorderSide(color: colors.text.withOpacity(0.24)),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
@@ -171,7 +173,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     );
   }
 
-  Widget _buildSuccessView() {
+  Widget _buildSuccessView(AppColors colors) {
     final qrData = _submittedOrder?.qrToken;
     final hasQr = qrData != null && qrData.isNotEmpty;
 
@@ -186,7 +188,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF7C3AED), Color(0xFFA855F7)],
+                colors: [AppPalette.accent, AppPalette.accentLight],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -252,10 +254,10 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
           const SizedBox(height: 28),
 
           // Order info
-          const Text(
+          Text(
             'Detalles del Pedido',
             style: TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                fontSize: 18, fontWeight: FontWeight.bold, color: colors.text),
           ),
           const SizedBox(height: 15),
 
@@ -263,33 +265,36 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             icon: Icons.tag,
             title: 'Número de Solicitud',
             value: '#${_submittedOrder?.id ?? '---'}',
-            color: const Color(0xFF7C3AED),
+            color: AppPalette.accent,
+            colors: colors,
           ),
           const SizedBox(height: 10),
           _buildInfoCard(
             icon: Icons.calendar_today,
             title: 'Fecha de Retiro',
             value: DateFormat('dd/MM/yyyy').format(widget.pickupDate),
-            color: const Color(0xFF3B82F6),
+            color: AppPalette.info,
+            colors: colors,
           ),
           const SizedBox(height: 10),
           _buildInfoCard(
             icon: Icons.event_available,
             title: 'Fecha de Devolución',
             value: DateFormat('dd/MM/yyyy').format(widget.returnDate),
-            color: const Color(0xFF10B981),
+            color: AppPalette.success,
+            colors: colors,
           ),
           const SizedBox(height: 24),
 
           // Items
-          const Text(
+          Text(
             'Artículos Solicitados',
             style: TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                fontSize: 18, fontWeight: FontWeight.bold, color: colors.text),
           ),
           const SizedBox(height: 15),
 
-          ...widget.cartItems.map((item) => _buildItemCard(item)),
+          ...widget.cartItems.map((item) => _buildItemCard(item, colors)),
 
           const SizedBox(height: 20),
 
@@ -297,23 +302,23 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A2E),
+              color: colors.card,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: const Color(0xFFF59E0B).withOpacity(0.5)),
+                  color: AppPalette.warning.withOpacity(0.5)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.info_outline, color: Color(0xFFF59E0B), size: 20),
+                    Icon(Icons.info_outline, color: AppPalette.warning, size: 20),
                     SizedBox(width: 10),
                     Text('Instrucciones',
                         style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFFF59E0B))),
+                            color: AppPalette.warning)),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -323,7 +328,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                   '• Presenta el QR en el almacén en la fecha seleccionada\n'
                   '• Recibirás una notificación cuando sea aprobada',
                   style: TextStyle(
-                      fontSize: 14, color: Colors.grey[300], height: 1.6),
+                      fontSize: 14, color: colors.textSub, height: 1.6),
                 ),
               ],
             ),
@@ -338,7 +343,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               onPressed: () =>
                   Navigator.of(context).popUntil((route) => route.isFirst),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
+                backgroundColor: AppPalette.success,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
@@ -358,11 +363,12 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     required String title,
     required String value,
     required Color color,
+    required AppColors colors,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: colors.card,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -380,13 +386,13 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+                  style: TextStyle(fontSize: 12, color: colors.textSub)),
               const SizedBox(height: 4),
               Text(value,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white)),
+                      color: colors.text)),
             ],
           ),
         ],
@@ -394,12 +400,12 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     );
   }
 
-  Widget _buildItemCard(CartItem item) {
+  Widget _buildItemCard(CartItem item, AppColors colors) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: colors.card,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -407,11 +413,11 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF7C3AED).withOpacity(0.2),
+              color: AppPalette.accent.withOpacity(0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.inventory_2_outlined,
-                color: Color(0xFF7C3AED), size: 20),
+                color: AppPalette.accent, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -419,13 +425,13 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(item.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white)),
+                        color: colors.text)),
                 Text('SKU: ${item.sku}',
                     style:
-                        TextStyle(fontSize: 11, color: Colors.grey[400])),
+                        TextStyle(fontSize: 11, color: colors.textSub)),
               ],
             ),
           ),
@@ -433,14 +439,14 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFF0F0F1E),
+              color: colors.bg,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text('x${item.quantity}',
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white)),
+                    color: colors.text)),
           ),
         ],
       ),

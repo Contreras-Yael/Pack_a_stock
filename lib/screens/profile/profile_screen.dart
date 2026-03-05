@@ -3,6 +3,7 @@ import '../auth/login_screen.dart';
 import '../../widgets/app_drawer.dart';
 import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
+import '../../config/app_colors.dart';
 import '../../services/order_service.dart';
 import '../../models/user_model.dart';
 import 'edit_profile_screen.dart';
@@ -46,11 +47,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1E),
+      backgroundColor: colors.bg,
       drawer: const AppDrawer(currentRoute: 'profile'),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: colors.card,
+        foregroundColor: colors.text,
         title: const Text('Mi Perfil'),
         elevation: 0,
         actions: [
@@ -75,8 +78,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       body: _loading
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF7C3AED)),
+          ? Center(
+              child: CircularProgressIndicator(color: AppPalette.accent),
             )
           : SingleChildScrollView(
               child: Column(
@@ -157,12 +160,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Personal info
-                        const Text(
+                        Text(
                           'Información Personal',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: colors.text,
                           ),
                         ),
                         const SizedBox(height: 15),
@@ -171,12 +174,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           icon: Icons.badge_outlined,
                           title: 'ID de Usuario',
                           value: 'EMP-${_user?.id ?? '---'}',
+                          colors: colors,
                         ),
                         const SizedBox(height: 10),
                         _buildInfoCard(
                           icon: Icons.email_outlined,
                           title: 'Correo',
                           value: _user?.email ?? '---',
+                          colors: colors,
                         ),
                         const SizedBox(height: 10),
                         _buildInfoCard(
@@ -185,17 +190,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           value: _user?.userType == 'employee'
                               ? 'Empleado'
                               : 'Inventarista',
+                          colors: colors,
                         ),
 
                         const SizedBox(height: 30),
 
                         // Statistics
-                        const Text(
+                        Text(
                           'Mis Estadísticas',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: colors.text,
                           ),
                         ),
                         const SizedBox(height: 15),
@@ -207,7 +213,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 icon: Icons.inventory_2_outlined,
                                 label: 'Activos',
                                 value: '${_summary['active_loans']}',
-                                color: const Color(0xFF7C3AED),
+                                color: AppPalette.accent,
+                                colors: colors,
                               ),
                             ),
                             const SizedBox(width: 15),
@@ -216,7 +223,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 icon: Icons.pending_outlined,
                                 label: 'Pendientes',
                                 value: '${_summary['pending_requests']}',
-                                color: const Color(0xFFF59E0B),
+                                color: AppPalette.warning,
+                                colors: colors,
                               ),
                             ),
                           ],
@@ -229,7 +237,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 icon: Icons.check_circle_outline,
                                 label: 'Completados',
                                 value: '${_summary['completed_loans']}',
-                                color: const Color(0xFF10B981),
+                                color: AppPalette.success,
+                                colors: colors,
                               ),
                             ),
                             const SizedBox(width: 15),
@@ -239,7 +248,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 label: 'Total',
                                 value:
                                     '${(_summary['active_loans'] ?? 0) + (_summary['pending_requests'] ?? 0) + (_summary['completed_loans'] ?? 0)}',
-                                color: const Color(0xFF3B82F6),
+                                color: AppPalette.info,
+                                colors: colors,
                               ),
                             ),
                           ],
@@ -284,23 +294,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required IconData icon,
     required String title,
     required String value,
+    required AppColors colors,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: colors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: colors.border),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFF7C3AED).withOpacity(0.2),
+              color: AppPalette.accent.withOpacity(0.2),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: const Color(0xFF7C3AED), size: 20),
+            child: Icon(icon, color: AppPalette.accent, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -308,13 +319,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+                    style: TextStyle(fontSize: 12, color: colors.textHint)),
                 const SizedBox(height: 4),
                 Text(value,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white)),
+                        color: colors.text)),
               ],
             ),
           ),
@@ -328,11 +339,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String label,
     required String value,
     required Color color,
+    required AppColors colors,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: colors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
@@ -352,7 +364,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fontSize: 24, fontWeight: FontWeight.bold, color: color)),
           const SizedBox(height: 4),
           Text(label,
-              style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+              style: TextStyle(fontSize: 12, color: colors.textHint),
               textAlign: TextAlign.center),
         ],
       ),
@@ -360,15 +372,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showLogoutDialog(BuildContext context) {
+    final colors = context.colors;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Cerrar Sesión',
-            style: TextStyle(color: Colors.white)),
-        content: const Text(
+        backgroundColor: colors.card,
+        title: Text('Cerrar Sesión',
+            style: TextStyle(color: colors.text)),
+        content: Text(
           '¿Estás seguro de que deseas cerrar sesión?',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: colors.textHint),
         ),
         actions: [
           TextButton(

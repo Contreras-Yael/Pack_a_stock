@@ -4,6 +4,7 @@ import '../../models/loan_model.dart';
 import '../../services/loan_service.dart';
 import '../../widgets/app_drawer.dart';
 import 'loan_detail_screen.dart';
+import '../../config/app_colors.dart';
 
 class LoansScreen extends StatefulWidget {
   const LoansScreen({super.key});
@@ -58,33 +59,34 @@ class _LoansScreenState extends State<LoansScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1E),
+      backgroundColor: colors.bg,
       drawer: const AppDrawer(currentRoute: 'loans'),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Mis Préstamos'),
+        backgroundColor: colors.card,
+        title: Text('Mis Préstamos', style: TextStyle(color: colors.text)),
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: colors.text),
             onPressed: _loadLoans,
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFF7C3AED),
-          labelColor: const Color(0xFF7C3AED),
-          unselectedLabelColor: Colors.grey,
+          indicatorColor: AppPalette.accent,
+          labelColor: AppPalette.accent,
+          unselectedLabelColor: colors.textHint,
           tabs: [
             Tab(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Activos'),
+                  Text('Activos', style: TextStyle(color: colors.text)),
                   if (_activeLoans.isNotEmpty) ...[
                     const SizedBox(width: 6),
-                    _badge(_activeLoans.length, const Color(0xFF10B981)),
+                    _badge(_activeLoans.length, AppPalette.success),
                   ],
                 ],
               ),
@@ -93,21 +95,21 @@ class _LoansScreenState extends State<LoansScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Vencidos'),
+                  Text('Vencidos', style: TextStyle(color: colors.text)),
                   if (_overdueLoans.isNotEmpty) ...[
                     const SizedBox(width: 6),
-                    _badge(_overdueLoans.length, const Color(0xFFEF4444)),
+                    _badge(_overdueLoans.length, AppPalette.error),
                   ],
                 ],
               ),
             ),
-            const Tab(text: 'Historial'),
+            Tab(child: Text('Historial', style: TextStyle(color: colors.text))),
           ],
         ),
       ),
       body: _loading
           ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF7C3AED)),
+              child: CircularProgressIndicator(color: AppPalette.accent),
             )
           : TabBarView(
               controller: _tabController,
@@ -176,11 +178,12 @@ class _LoansScreenState extends State<LoansScreen>
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF1A1A2E),
+      backgroundColor: context.colors.card,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
+        final sheetColors = ctx.colors;
         return StatefulBuilder(
           builder: (ctx, setModalState) {
             return Padding(
@@ -196,20 +199,20 @@ class _LoansScreenState extends State<LoansScreen>
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today, color: Color(0xFF7C3AED)),
+                      const Icon(Icons.calendar_today, color: AppPalette.accent),
                       const SizedBox(width: 10),
-                      const Expanded(
+                      Expanded(
                         child: Text(
                           'Solicitar Extensión',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: sheetColors.text,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close, color: Colors.grey),
+                        icon: Icon(Icons.close, color: sheetColors.textHint),
                         onPressed: () => Navigator.pop(ctx),
                       ),
                     ],
@@ -217,7 +220,7 @@ class _LoansScreenState extends State<LoansScreen>
                   const SizedBox(height: 8),
                   Text(
                     loan.materialName,
-                    style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                    style: TextStyle(color: sheetColors.textSub, fontSize: 14),
                   ),
                   const SizedBox(height: 20),
 
@@ -226,7 +229,8 @@ class _LoansScreenState extends State<LoansScreen>
                     'Fecha actual de devolución',
                     DateFormat('dd MMM yyyy', 'es').format(loan.expectedReturnDate),
                     Icons.event,
-                    const Color(0xFFF59E0B),
+                    AppPalette.warning,
+                    sheetColors,
                   ),
                   const SizedBox(height: 16),
 
@@ -242,7 +246,7 @@ class _LoansScreenState extends State<LoansScreen>
                           return Theme(
                             data: ThemeData.dark().copyWith(
                               colorScheme: const ColorScheme.dark(
-                                primary: Color(0xFF7C3AED),
+                                primary: AppPalette.accent,
                                 surface: Color(0xFF1A1A2E),
                               ),
                             ),
@@ -257,14 +261,14 @@ class _LoansScreenState extends State<LoansScreen>
                     child: Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0F0F1E),
+                        color: sheetColors.bg,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFF7C3AED)),
+                        border: Border.all(color: AppPalette.accent),
                       ),
                       child: Row(
                         children: [
                           const Icon(Icons.edit_calendar,
-                              color: Color(0xFF7C3AED), size: 20),
+                              color: AppPalette.accent, size: 20),
                           const SizedBox(width: 10),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,12 +276,12 @@ class _LoansScreenState extends State<LoansScreen>
                               Text(
                                 'Nueva fecha de devolución',
                                 style: TextStyle(
-                                    color: Colors.grey[400], fontSize: 12),
+                                    color: sheetColors.textSub, fontSize: 12),
                               ),
                               Text(
                                 DateFormat('dd MMM yyyy', 'es').format(selectedDate),
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: sheetColors.text,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -285,7 +289,7 @@ class _LoansScreenState extends State<LoansScreen>
                             ],
                           ),
                           const Spacer(),
-                          const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                          Icon(Icons.arrow_drop_down, color: sheetColors.textHint),
                         ],
                       ),
                     ),
@@ -295,20 +299,20 @@ class _LoansScreenState extends State<LoansScreen>
                   // Reason field
                   TextField(
                     controller: reasonController,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: sheetColors.text),
                     maxLines: 3,
                     decoration: InputDecoration(
                       hintText: 'Motivo de la extensión (opcional)',
-                      hintStyle: TextStyle(color: Colors.grey[500]),
+                      hintStyle: TextStyle(color: sheetColors.textHint),
                       filled: true,
-                      fillColor: const Color(0xFF0F0F1E),
+                      fillColor: sheetColors.bg,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF7C3AED)),
+                        borderSide: const BorderSide(color: AppPalette.accent),
                       ),
                     ),
                   ),
@@ -333,7 +337,7 @@ class _LoansScreenState extends State<LoansScreen>
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Extensión solicitada exitosamente'),
-                                    backgroundColor: Color(0xFF10B981),
+                                    backgroundColor: AppPalette.success,
                                   ),
                                 );
                                 _loadLoans();
@@ -348,7 +352,7 @@ class _LoansScreenState extends State<LoansScreen>
                               }
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF7C3AED),
+                        backgroundColor: AppPalette.accent,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -379,7 +383,7 @@ class _LoansScreenState extends State<LoansScreen>
     );
   }
 
-  Widget _infoRow(String label, String value, IconData icon, Color color) {
+  Widget _infoRow(String label, String value, IconData icon, Color color, AppColors colors) {
     return Row(
       children: [
         Icon(icon, size: 16, color: color),
@@ -388,9 +392,9 @@ class _LoansScreenState extends State<LoansScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label,
-                style: TextStyle(color: Colors.grey[500], fontSize: 11)),
+                style: TextStyle(color: colors.textHint, fontSize: 11)),
             Text(value,
-                style: const TextStyle(color: Colors.white, fontSize: 14)),
+                style: TextStyle(color: colors.text, fontSize: 14)),
           ],
         ),
       ],
@@ -423,16 +427,17 @@ class _LoansList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     if (loans.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(emptyIcon, size: 64, color: Colors.grey[700]),
+            Icon(emptyIcon, size: 64, color: colors.textHint),
             const SizedBox(height: 16),
             Text(
               emptyMessage,
-              style: TextStyle(fontSize: 16, color: Colors.grey[400]),
+              style: TextStyle(fontSize: 16, color: colors.textSub),
             ),
           ],
         ),
@@ -441,7 +446,7 @@ class _LoansList extends StatelessWidget {
 
     return RefreshIndicator(
       onRefresh: onRefresh,
-      color: const Color(0xFF7C3AED),
+      color: AppPalette.accent,
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         itemCount: loans.length,
@@ -477,10 +482,10 @@ class _LoanCard extends StatelessWidget {
 
   Color get _progressColor {
     final days = loan.daysRemaining;
-    if (days <= 0) return const Color(0xFFEF4444);
-    if (days <= 2) return const Color(0xFFEF4444);
-    if (days <= 5) return const Color(0xFFF59E0B);
-    return const Color(0xFF10B981);
+    if (days <= 0) return AppPalette.error;
+    if (days <= 2) return AppPalette.error;
+    if (days <= 5) return AppPalette.warning;
+    return AppPalette.success;
   }
 
   double get _progressValue {
@@ -508,19 +513,20 @@ class _LoanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final borderColor = isOverdue
-        ? const Color(0xFFEF4444).withOpacity(0.4)
-        : Colors.white.withOpacity(0.08);
+        ? AppPalette.error.withOpacity(0.4)
+        : colors.border;
     final accentColor = isOverdue
-        ? const Color(0xFFEF4444)
-        : const Color(0xFF3B82F6);
+        ? AppPalette.error
+        : AppPalette.info;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: colors.card,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: borderColor),
         ),
@@ -554,8 +560,8 @@ class _LoanCard extends StatelessWidget {
                       children: [
                         Text(
                           loan.materialName,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: colors.text,
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                           ),
@@ -566,7 +572,7 @@ class _LoanCard extends StatelessWidget {
                         Text(
                           '${loan.quantity} unidad${loan.quantity == 1 ? '' : 'es'}',
                           style:
-                              TextStyle(color: Colors.grey[400], fontSize: 13),
+                              TextStyle(color: colors.textSub, fontSize: 13),
                         ),
                       ],
                     ),
@@ -614,7 +620,7 @@ class _LoanCard extends StatelessWidget {
                           DateFormat('dd MMM yyyy', 'es')
                               .format(loan.expectedReturnDate),
                           style:
-                              TextStyle(color: Colors.grey[400], fontSize: 12),
+                              TextStyle(color: colors.textSub, fontSize: 12),
                         ),
                       ],
                     ),
@@ -623,7 +629,7 @@ class _LoanCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                       child: LinearProgressIndicator(
                         value: _progressValue,
-                        backgroundColor: Colors.white.withOpacity(0.1),
+                        backgroundColor: colors.border,
                         valueColor: AlwaysStoppedAnimation(_progressColor),
                         minHeight: 6,
                       ),
@@ -640,12 +646,12 @@ class _LoanCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    Icon(Icons.event, size: 14, color: Colors.grey[500]),
+                    Icon(Icons.event, size: 14, color: colors.textHint),
                     const SizedBox(width: 4),
                     Text(
                       '${loan.isConsumable ? 'Recibido' : 'Devuelto'}: ${loan.actualReturnDate != null ? DateFormat('dd MMM yyyy', 'es').format(loan.actualReturnDate!) : '-'}',
                       style:
-                          TextStyle(color: Colors.grey[400], fontSize: 12),
+                          TextStyle(color: colors.textSub, fontSize: 12),
                     ),
                   ],
                 ),
@@ -660,11 +666,11 @@ class _LoanCard extends StatelessWidget {
                 children: [
                   // Issue date
                   Icon(Icons.calendar_today,
-                      size: 14, color: Colors.grey[500]),
+                      size: 14, color: colors.textHint),
                   const SizedBox(width: 4),
                   Text(
                     'Desde: ${DateFormat('dd MMM', 'es').format(loan.issuedAt)}',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                    style: TextStyle(color: colors.textSub, fontSize: 12),
                   ),
                   const Spacer(),
                   // Extension button
@@ -674,7 +680,7 @@ class _LoanCard extends StatelessWidget {
                       icon: const Icon(Icons.add_circle_outline, size: 16),
                       label: const Text('Extensión'),
                       style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF7C3AED),
+                        foregroundColor: AppPalette.accent,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
                         minimumSize: Size.zero,
@@ -682,8 +688,8 @@ class _LoanCard extends StatelessWidget {
                       ),
                     ),
                   ] else ...[
-                    const Icon(Icons.chevron_right,
-                        color: Colors.grey, size: 20),
+                    Icon(Icons.chevron_right,
+                        color: colors.textHint, size: 20),
                   ],
                 ],
               ),

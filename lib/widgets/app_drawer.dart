@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_colors.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/history/history_screen.dart';
 import '../screens/loans/loans_screen.dart';
@@ -42,15 +43,16 @@ class _AppDrawerState extends State<AppDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Drawer(
-      backgroundColor: const Color(0xFF1A1A2E),
+      backgroundColor: colors.card,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF7C3AED), Color(0xFFA855F7)],
+                colors: [AppPalette.accent, AppPalette.accentLight],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -80,7 +82,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         : const Icon(
                             Icons.person,
                             size: 35,
-                            color: Color(0xFF7C3AED),
+                            color: AppPalette.accent,
                           ),
                   ),
                 ),
@@ -112,7 +114,7 @@ class _AppDrawerState extends State<AppDrawer> {
             icon: Icons.home,
             title: 'Inicio',
             route: 'home',
-            color: const Color(0xFF7C3AED),
+            color: AppPalette.accent,
             onTap: () {
               Navigator.pushAndRemoveUntil(
                 context,
@@ -121,7 +123,7 @@ class _AppDrawerState extends State<AppDrawer> {
               );
             },
           ),
-          const Divider(color: Color(0xFF2A2A3E)),
+          Divider(color: colors.divider),
           _buildDrawerItem(
             context,
             icon: Icons.inventory_2_outlined,
@@ -209,7 +211,7 @@ class _AppDrawerState extends State<AppDrawer> {
               }
             },
           ),
-          const Divider(color: Color(0xFF2A2A3E)),
+          Divider(color: colors.divider),
           _buildDrawerItem(
             context,
             icon: Icons.qr_code_scanner,
@@ -283,8 +285,8 @@ class _AppDrawerState extends State<AppDrawer> {
                   'Carrito',
                   style: TextStyle(
                     color: isSelected
-                        ? const Color(0xFF10B981)
-                        : Colors.white,
+                        ? AppPalette.success
+                        : colors.text,
                     fontWeight:
                         isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
@@ -306,7 +308,7 @@ class _AppDrawerState extends State<AppDrawer> {
               );
             },
           ),
-          const Divider(color: Color(0xFF2A2A3E)),
+          Divider(color: colors.divider),
           ListenableBuilder(
             listenable: NotificationService(),
             builder: (context, _) {
@@ -343,9 +345,9 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                   ],
                 ),
-                title: const Text(
+                title: Text(
                   'Notificaciones',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: colors.text),
                 ),
                 selected: widget.currentRoute == 'notifications',
                 selectedTileColor:
@@ -378,7 +380,7 @@ class _AppDrawerState extends State<AppDrawer> {
               }
             },
           ),
-          const Divider(color: Color(0xFF2A2A3E)),
+          Divider(color: colors.divider),
           ListTile(
             leading: const Icon(Icons.logout_rounded, color: Color(0xFFEF4444)),
             title: const Text(
@@ -394,26 +396,27 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 
   Future<void> _confirmLogout(BuildContext context) async {
+    final colors = context.colors;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: colors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Cerrar sesión',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: const Text(
+        title: Text('Cerrar sesión',
+            style: TextStyle(color: colors.text, fontWeight: FontWeight.bold)),
+        content: Text(
           '¿Estás seguro de que deseas cerrar sesión?',
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: colors.textHint),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+            child: Text('Cancelar', style: TextStyle(color: colors.textHint)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF4444),
+              backgroundColor: AppPalette.error,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
@@ -445,13 +448,14 @@ class _AppDrawerState extends State<AppDrawer> {
     required VoidCallback onTap,
   }) {
     final isSelected = widget.currentRoute == route;
+    final colors = context.colors;
 
     return ListTile(
       leading: Icon(icon, color: color),
       title: Text(
         title,
         style: TextStyle(
-          color: isSelected ? color : Colors.white,
+          color: isSelected ? color : colors.text,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),

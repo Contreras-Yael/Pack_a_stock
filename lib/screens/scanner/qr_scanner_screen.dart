@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../material/material_detail_screen.dart';
 import '../../services/material_service.dart';
+import '../../config/app_colors.dart';
 
 class QRScannerScreen extends StatefulWidget {
   const QRScannerScreen({super.key});
@@ -44,7 +45,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Material no encontrado para QR: $code'),
-          backgroundColor: const Color(0xFFEF4444),
+          backgroundColor: AppPalette.error,
           action: SnackBarAction(
             label: 'OK',
             textColor: Colors.white,
@@ -64,7 +65,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Escanear QR'),
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: context.colors.card,
         actions: [
           IconButton(
             icon: const Icon(Icons.flash_on),
@@ -93,7 +94,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(color: Color(0xFF7C3AED)),
+                    CircularProgressIndicator(color: AppPalette.accent),
                     SizedBox(height: 16),
                     Text('Buscando material...',
                         style: TextStyle(color: Colors.white, fontSize: 16)),
@@ -147,14 +148,14 @@ class ScannerOverlay extends CustomPainter {
     );
 
     final borderPaint = Paint()
-      ..color = const Color(0xFF7C3AED)
+      ..color = AppPalette.accent
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3;
 
     canvas.drawRect(scanArea, borderPaint);
 
     final cornerPaint = Paint()
-      ..color = const Color(0xFF7C3AED)
+      ..color = AppPalette.accent
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5
       ..strokeCap = StrokeCap.round;

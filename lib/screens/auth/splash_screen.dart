@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
+import '../../config/app_colors.dart';
 import '../home/home_screen.dart';
 import 'login_screen.dart';
 
@@ -41,8 +42,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1E),
+      backgroundColor: colors.bg,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -51,14 +53,14 @@ class _SplashScreenState extends State<SplashScreen> {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF7C3AED), Color(0xFFA855F7)],
+                  colors: [AppPalette.accent, AppPalette.accentLight],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF7C3AED).withOpacity(0.4),
+                    color: AppPalette.accent.withOpacity(0.4),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
@@ -71,23 +73,23 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Pack-a-Stock',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: colors.text,
                 letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Sistema de Gestión de Préstamos',
-              style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+              style: TextStyle(fontSize: 14, color: colors.textSub),
             ),
             const SizedBox(height: 60),
             const CircularProgressIndicator(
-              color: Color(0xFF7C3AED),
+              color: AppPalette.accent,
               strokeWidth: 2,
             ),
           ],

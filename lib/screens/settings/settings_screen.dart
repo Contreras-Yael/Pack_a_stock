@@ -3,7 +3,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/app_drawer.dart';
 import '../../services/auth_Service.dart';
 import '../../services/notification_service.dart';
+import '../../services/theme_service.dart';
 import '../../models/user_model.dart';
+import '../../config/app_colors.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -59,41 +61,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1E),
+      backgroundColor: colors.bg,
       drawer: const AppDrawer(currentRoute: 'settings'),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Configuración'),
+        backgroundColor: colors.card,
+        foregroundColor: colors.text,
+        title: Text('Configuración', style: TextStyle(color: colors.text)),
         elevation: 0,
       ),
       body: _loading
           ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF7C3AED)))
+              child: CircularProgressIndicator(color: AppPalette.accent))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── Cuenta ──────────────────────────────────────────────
-                  _sectionTitle('Cuenta'),
+                  _sectionTitle('Cuenta', colors),
                   const SizedBox(height: 12),
-                  _buildUserCard(),
+                  _buildUserCard(colors),
                   const SizedBox(height: 10),
                   _buildActionTile(
+                    colors: colors,
                     icon: Icons.lock_outline,
-                    iconColor: const Color(0xFF7C3AED),
+                    iconColor: AppPalette.accent,
                     title: 'Cambiar contraseña',
                     subtitle: 'Actualizar tu contraseña de acceso',
-                    onTap: () => _showChangePasswordDialog(context),
+                    onTap: () => _showChangePasswordDialog(context, colors),
                   ),
 
                   const SizedBox(height: 30),
 
                   // ── Notificaciones ──────────────────────────────────────
-                  _sectionTitle('Notificaciones'),
+                  _sectionTitle('Notificaciones', colors),
                   const SizedBox(height: 12),
                   _buildSwitchTile(
+                    colors: colors,
                     icon: Icons.notifications_active_outlined,
                     title: 'Habilitar notificaciones',
                     subtitle: 'Recibir alertas del sistema',
@@ -105,6 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 10),
                   _buildSwitchTile(
+                    colors: colors,
                     icon: Icons.schedule_outlined,
                     title: 'Recordatorios de préstamos',
                     subtitle: 'Alertas sobre préstamos activos',
@@ -118,6 +125,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 10),
                   _buildSwitchTile(
+                    colors: colors,
                     icon: Icons.warning_amber_outlined,
                     title: 'Alertas de vencimiento',
                     subtitle: 'Aviso cuando un préstamo está por vencer',
@@ -130,19 +138,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         : null,
                   ),
                   const SizedBox(height: 10),
-                  _buildDaysSelectorTile(),
+                  _buildDaysSelectorTile(colors),
+
+                  const SizedBox(height: 30),
+
+                  // ── Apariencia ──────────────────────────────────────────
+                  _sectionTitle('Apariencia', colors),
+                  const SizedBox(height: 12),
+                  _buildThemeToggleTile(colors),
 
                   const SizedBox(height: 30),
 
                   // ── Aplicación ──────────────────────────────────────────
-                  _sectionTitle('Aplicación'),
+                  _sectionTitle('Aplicación', colors),
                   const SizedBox(height: 12),
                   _buildActionTile(
+                    colors: colors,
                     icon: Icons.info_outline,
-                    iconColor: const Color(0xFF3B82F6),
+                    iconColor: AppPalette.info,
                     title: 'Acerca de Pack-a-Stock',
                     subtitle: 'Versión 1.0.0',
-                    onTap: () => _showAboutDialog(context),
+                    onTap: () => _showAboutDialog(context, colors),
                   ),
 
                   const SizedBox(height: 30),
@@ -154,19 +170,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // ── Widgets ───────────────────────────────────────────────────────────────
 
-  Widget _sectionTitle(String title) {
+  Widget _sectionTitle(String title, AppColors colors) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.bold,
-        color: Color(0xFF7C3AED),
+        color: AppPalette.accent,
         letterSpacing: 1.1,
       ),
     );
   }
 
-  Widget _buildUserCard() {
+  Widget _buildUserCard(AppColors colors) {
     final initials = _user != null && _user!.fullName.isNotEmpty
         ? _user!.fullName.trim().split(' ').take(2).map((w) => w[0].toUpperCase()).join()
         : '?';
@@ -174,19 +190,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: colors.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: colors.border),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 26,
-            backgroundColor: const Color(0xFF7C3AED).withOpacity(0.2),
+            backgroundColor: AppPalette.accent.withOpacity(0.2),
             child: Text(
               initials,
               style: const TextStyle(
-                color: Color(0xFF7C3AED),
+                color: AppPalette.accent,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -199,8 +215,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 Text(
                   _user?.fullName ?? '—',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: colors.text,
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
                   ),
@@ -208,19 +224,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 3),
                 Text(
                   _user?.email ?? '—',
-                  style: TextStyle(color: Colors.grey[400], fontSize: 13),
+                  style: TextStyle(color: colors.textSub, fontSize: 13),
                 ),
                 const SizedBox(height: 4),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF10B981).withOpacity(0.15),
+                    color: AppPalette.success.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
                     'Empleado',
                     style: TextStyle(
-                      color: Color(0xFF10B981),
+                      color: AppPalette.success,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -235,6 +251,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSwitchTile({
+    required AppColors colors,
     required IconData icon,
     required String title,
     required String subtitle,
@@ -245,20 +262,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: colors.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: colors.border),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(9),
             decoration: BoxDecoration(
-              color: const Color(0xFF7C3AED).withOpacity(isDisabled ? 0.06 : 0.15),
+              color: AppPalette.accent.withOpacity(isDisabled ? 0.06 : 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon,
-                color: const Color(0xFF7C3AED).withOpacity(isDisabled ? 0.3 : 1.0),
+                color: AppPalette.accent.withOpacity(isDisabled ? 0.3 : 1.0),
                 size: 18),
           ),
           const SizedBox(width: 12),
@@ -270,13 +287,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: isDisabled ? Colors.white38 : Colors.white,
+                      color: isDisabled
+                          ? colors.text.withOpacity(0.38)
+                          : colors.text,
                     )),
                 const SizedBox(height: 2),
                 Text(subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: isDisabled ? Colors.white24 : Colors.grey[500],
+                      color: isDisabled
+                          ? colors.text.withOpacity(0.24)
+                          : colors.textHint,
                     )),
               ],
             ),
@@ -284,7 +305,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF7C3AED),
+            activeColor: AppPalette.accent,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ],
@@ -292,25 +313,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildDaysSelectorTile() {
+  Widget _buildDaysSelectorTile(AppColors colors) {
     final enabled = _notificationsEnabled && _expirationAlerts;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: colors.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: colors.border),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(9),
             decoration: BoxDecoration(
-              color: const Color(0xFF7C3AED).withOpacity(enabled ? 0.15 : 0.06),
+              color: AppPalette.accent.withOpacity(enabled ? 0.15 : 0.06),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(Icons.calendar_today_outlined,
-                color: const Color(0xFF7C3AED).withOpacity(enabled ? 1.0 : 0.3),
+                color: AppPalette.accent.withOpacity(enabled ? 1.0 : 0.3),
                 size: 18),
           ),
           const SizedBox(width: 12),
@@ -322,13 +343,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: enabled ? Colors.white : Colors.white38,
+                      color: enabled
+                          ? colors.text
+                          : colors.text.withOpacity(0.38),
                     )),
                 const SizedBox(height: 2),
                 Text('Alerta antes del vencimiento',
                     style: TextStyle(
                       fontSize: 12,
-                      color: enabled ? Colors.grey[500] : Colors.white24,
+                      color: enabled
+                          ? colors.textHint
+                          : colors.text.withOpacity(0.24),
                     )),
               ],
             ),
@@ -336,6 +361,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Row(
             children: [
               _dayBtn(
+                colors: colors,
                 icon: Icons.remove,
                 enabled: enabled && _reminderDays > 1,
                 onTap: () {
@@ -350,11 +376,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: enabled ? Colors.white : Colors.white38,
+                    color: enabled
+                        ? colors.text
+                        : colors.text.withOpacity(0.38),
                   ),
                 ),
               ),
               _dayBtn(
+                colors: colors,
                 icon: Icons.add,
                 enabled: enabled && _reminderDays < 7,
                 onTap: () {
@@ -369,7 +398,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _dayBtn({required IconData icon, required bool enabled, required VoidCallback onTap}) {
+  Widget _dayBtn({
+    required AppColors colors,
+    required IconData icon,
+    required bool enabled,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: enabled ? onTap : null,
       child: Container(
@@ -377,18 +411,89 @@ class _SettingsScreenState extends State<SettingsScreen> {
         height: 30,
         decoration: BoxDecoration(
           color: enabled
-              ? const Color(0xFF7C3AED).withOpacity(0.15)
-              : Colors.white.withOpacity(0.04),
+              ? AppPalette.accent.withOpacity(0.15)
+              : colors.border.withOpacity(0.5),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon,
             size: 16,
-            color: enabled ? const Color(0xFF7C3AED) : Colors.white24),
+            color: enabled
+                ? AppPalette.accent
+                : colors.text.withOpacity(0.24)),
+      ),
+    );
+  }
+
+  Widget _buildThemeToggleTile(AppColors colors) {
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colors.border),
+      ),
+      child: ListenableBuilder(
+        listenable: themeNotifier,
+        builder: (context, _) {
+          final dark = themeNotifier.isDark;
+          return InkWell(
+            onTap: () => themeNotifier.toggle(),
+            borderRadius: BorderRadius.circular(14),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(9),
+                    decoration: BoxDecoration(
+                      color: AppPalette.accent.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      dark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                      color: AppPalette.accent,
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          dark ? 'Modo oscuro' : 'Modo claro',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: colors.text,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          dark
+                              ? 'Toca para cambiar a modo claro'
+                              : 'Toca para cambiar a modo oscuro',
+                          style: TextStyle(fontSize: 12, color: colors.textHint),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: !dark,
+                    onChanged: (_) => themeNotifier.toggle(),
+                    activeColor: AppPalette.accent,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildActionTile({
+    required AppColors colors,
     required IconData icon,
     required Color iconColor,
     required String title,
@@ -401,9 +506,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: colors.card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
+          border: Border.all(color: colors.border),
         ),
         child: Row(
           children: [
@@ -421,17 +526,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white)),
+                          color: colors.text)),
                   const SizedBox(height: 2),
                   Text(subtitle,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                      style: TextStyle(fontSize: 12, color: colors.textHint)),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: Colors.grey[600], size: 20),
+            Icon(Icons.chevron_right, color: colors.textHint, size: 20),
           ],
         ),
       ),
@@ -440,7 +545,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // ── Dialogs ───────────────────────────────────────────────────────────────
 
-  void _showChangePasswordDialog(BuildContext context) {
+  void _showChangePasswordDialog(BuildContext context, AppColors colors) {
     final currentCtrl = TextEditingController();
     final newCtrl = TextEditingController();
     final confirmCtrl = TextEditingController();
@@ -454,14 +559,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (dialogCtx) => StatefulBuilder(
         builder: (dialogCtx, setDialog) => AlertDialog(
-          backgroundColor: const Color(0xFF1A1A2E),
+          backgroundColor: colors.card,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.lock_outline, color: Color(0xFF7C3AED), size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.lock_outline, color: AppPalette.accent, size: 20),
+              const SizedBox(width: 8),
               Text('Cambiar contraseña',
-                  style: TextStyle(color: Colors.white, fontSize: 17)),
+                  style: TextStyle(color: colors.text, fontSize: 17)),
             ],
           ),
           content: Column(
@@ -471,39 +576,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEF4444).withOpacity(0.1),
+                    color: AppPalette.error.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.3)),
+                    border: Border.all(color: AppPalette.error.withOpacity(0.3)),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.error_outline,
-                          color: Color(0xFFEF4444), size: 16),
+                          color: AppPalette.error, size: 16),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(dialogError!,
                             style: const TextStyle(
-                                color: Color(0xFFEF4444), fontSize: 12)),
+                                color: AppPalette.error, fontSize: 12)),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 12),
               ],
-              _pwField(currentCtrl, 'Contraseña actual', showCurrent,
+              _pwField(colors, currentCtrl, 'Contraseña actual', showCurrent,
                   () => setDialog(() => showCurrent = !showCurrent)),
               const SizedBox(height: 10),
-              _pwField(newCtrl, 'Nueva contraseña', showNew,
+              _pwField(colors, newCtrl, 'Nueva contraseña', showNew,
                   () => setDialog(() => showNew = !showNew)),
               const SizedBox(height: 10),
-              _pwField(confirmCtrl, 'Confirmar contraseña', showConfirm,
+              _pwField(colors, confirmCtrl, 'Confirmar contraseña', showConfirm,
                   () => setDialog(() => showConfirm = !showConfirm)),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx),
-              child: Text('Cancelar', style: TextStyle(color: Colors.grey[500])),
+              child: Text('Cancelar', style: TextStyle(color: colors.textHint)),
             ),
             ElevatedButton(
               onPressed: saving
@@ -539,7 +644,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Contraseña actualizada correctamente'),
-                              backgroundColor: Color(0xFF10B981),
+                              backgroundColor: AppPalette.success,
                             ),
                           );
                         }
@@ -552,7 +657,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       }
                     },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7C3AED),
+                backgroundColor: AppPalette.accent,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
@@ -571,28 +676,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _pwField(TextEditingController ctrl, String label, bool visible,
-      VoidCallback toggleVisible) {
+  Widget _pwField(AppColors colors, TextEditingController ctrl, String label,
+      bool visible, VoidCallback toggleVisible) {
     return TextField(
       controller: ctrl,
       obscureText: !visible,
-      style: const TextStyle(color: Colors.white, fontSize: 14),
+      style: TextStyle(color: colors.text, fontSize: 14),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.grey[500], fontSize: 13),
+        labelStyle: TextStyle(color: colors.textHint, fontSize: 13),
         filled: true,
-        fillColor: const Color(0xFF0F0F1E),
+        fillColor: colors.input,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFF7C3AED)),
+          borderSide: const BorderSide(color: AppPalette.accent),
         ),
         suffixIcon: IconButton(
           icon: Icon(visible ? Icons.visibility_off : Icons.visibility,
-              size: 18, color: Colors.grey[500]),
+              size: 18, color: colors.textHint),
           onPressed: toggleVisible,
         ),
         contentPadding:
@@ -601,27 +706,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showAboutDialog(BuildContext context) {
+  void _showAboutDialog(BuildContext context, AppColors colors) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: colors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF7C3AED).withOpacity(0.15),
+                color: AppPalette.accent.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(Icons.inventory_2_outlined,
-                  color: Color(0xFF7C3AED), size: 22),
+                  color: AppPalette.accent, size: 22),
             ),
             const SizedBox(width: 12),
-            const Text('Pack-a-Stock',
+            Text('Pack-a-Stock',
                 style: TextStyle(
-                    color: Colors.white,
+                    color: colors.text,
                     fontSize: 18,
                     fontWeight: FontWeight.bold)),
           ],
@@ -629,43 +734,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _aboutRow(Icons.tag, 'Versión', '1.0.0'),
+            _aboutRow(colors, Icons.tag, 'Versión', '1.0.0'),
             const SizedBox(height: 10),
-            _aboutRow(Icons.phone_android, 'Plataforma', 'Android / iOS'),
+            _aboutRow(colors, Icons.phone_android, 'Plataforma', 'Android / iOS'),
             const SizedBox(height: 10),
-            _aboutRow(Icons.business_outlined, 'Desarrollado por',
+            _aboutRow(colors, Icons.business_outlined, 'Desarrollado por',
                 'Pack-a-Stock Team'),
             const SizedBox(height: 16),
             Text(
               'Sistema de gestión de préstamos de materiales y equipos.',
-              style: TextStyle(color: Colors.grey[400], fontSize: 13),
+              style: TextStyle(color: colors.textSub, fontSize: 13),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text('© 2026 Pack-a-Stock',
-                style: TextStyle(color: Colors.grey[600], fontSize: 11)),
+                style: TextStyle(color: colors.textHint, fontSize: 11)),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Cerrar',
-                style: TextStyle(color: Color(0xFF7C3AED))),
+                style: TextStyle(color: AppPalette.accent)),
           ),
         ],
       ),
     );
   }
 
-  Widget _aboutRow(IconData icon, String label, String value) {
+  Widget _aboutRow(AppColors colors, IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey[500]),
+        Icon(icon, size: 16, color: colors.textHint),
         const SizedBox(width: 8),
         Text('$label: ',
-            style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+            style: TextStyle(color: colors.textHint, fontSize: 13)),
         Text(value,
-            style: const TextStyle(color: Colors.white, fontSize: 13)),
+            style: TextStyle(color: colors.text, fontSize: 13)),
       ],
     );
   }

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../models/loan_model.dart';
 import '../../services/loan_service.dart';
 import '../../widgets/app_drawer.dart';
+import '../../config/app_colors.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -83,20 +84,22 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   static const _pieColors = [
-    Color(0xFF7C3AED),
-    Color(0xFF3B82F6),
-    Color(0xFF10B981),
-    Color(0xFFF59E0B),
-    Color(0xFFEC4899),
+    AppPalette.accent,
+    AppPalette.info,
+    AppPalette.success,
+    AppPalette.warning,
+    AppPalette.pink,
   ];
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1E),
+      backgroundColor: colors.bg,
       drawer: const AppDrawer(currentRoute: 'stats'),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: colors.card,
+        foregroundColor: colors.text,
         title: const Text('Mi Resumen'),
         elevation: 0,
         actions: [
@@ -107,28 +110,28 @@ class _StatsScreenState extends State<StatsScreen> {
         ],
       ),
       body: _loading
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF7C3AED)))
+          ? Center(
+              child: CircularProgressIndicator(color: AppPalette.accent))
           : RefreshIndicator(
               onRefresh: _loadData,
-              color: const Color(0xFF7C3AED),
-              backgroundColor: const Color(0xFF1A1A2E),
+              color: AppPalette.accent,
+              backgroundColor: colors.card,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildStatTiles(),
+                    _buildStatTiles(colors),
                     const SizedBox(height: 28),
-                    _sectionTitle('Préstamos por mes', Icons.bar_chart_rounded),
+                    _sectionTitle('Préstamos por mes', Icons.bar_chart_rounded, colors),
                     const SizedBox(height: 16),
-                    _buildBarChart(),
+                    _buildBarChart(colors),
                     const SizedBox(height: 28),
                     _sectionTitle(
-                        'Materiales más solicitados', Icons.pie_chart_rounded),
+                        'Materiales más solicitados', Icons.pie_chart_rounded, colors),
                     const SizedBox(height: 16),
-                    _buildPieSection(),
+                    _buildPieSection(colors),
                   ],
                 ),
               ),
@@ -137,15 +140,16 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   // ── Stat tiles ─────────────────────────────────────────────────────────────
-  Widget _buildStatTiles() {
+  Widget _buildStatTiles(AppColors colors) {
     return Row(
       children: [
         _statTile(
           label: 'Total',
           value: '$_totalLoans',
           sub: 'préstamos',
-          color: const Color(0xFF7C3AED),
+          color: AppPalette.accent,
           icon: Icons.inventory_2_outlined,
+          colors: colors,
         ),
         const SizedBox(width: 10),
         _statTile(
@@ -153,19 +157,21 @@ class _StatsScreenState extends State<StatsScreen> {
           value: '${(_returnRate * 100).toStringAsFixed(0)}%',
           sub: 'a tiempo',
           color: _returnRate >= 0.8
-              ? const Color(0xFF10B981)
+              ? AppPalette.success
               : _returnRate >= 0.5
-                  ? const Color(0xFFF59E0B)
-                  : const Color(0xFFEF4444),
+                  ? AppPalette.warning
+                  : AppPalette.error,
           icon: Icons.verified_outlined,
+          colors: colors,
         ),
         const SizedBox(width: 10),
         _statTile(
           label: 'Promedio',
           value: '${_avgDays.toStringAsFixed(0)}d',
           sub: 'por préstamo',
-          color: const Color(0xFF3B82F6),
+          color: AppPalette.info,
           icon: Icons.schedule_rounded,
+          colors: colors,
         ),
       ],
     );
@@ -177,12 +183,13 @@ class _StatsScreenState extends State<StatsScreen> {
     required String sub,
     required Color color,
     required IconData icon,
+    required AppColors colors,
   }) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: colors.card,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: color.withOpacity(0.25)),
         ),
@@ -197,13 +204,12 @@ class _StatsScreenState extends State<StatsScreen> {
                     fontWeight: FontWeight.bold,
                     color: color)),
             Text(label,
-                style: const TextStyle(
-                    color: Colors.white,
+                style: TextStyle(
+                    color: colors.text,
                     fontSize: 11,
                     fontWeight: FontWeight.w600)),
             Text(sub,
-                style:
-                    TextStyle(color: Colors.grey[500], fontSize: 10)),
+                style: TextStyle(color: colors.textHint, fontSize: 10)),
           ],
         ),
       ),
@@ -211,7 +217,7 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   // ── Bar chart ──────────────────────────────────────────────────────────────
-  Widget _buildBarChart() {
+  Widget _buildBarChart(AppColors colors) {
     final data = _monthlyData;
     final maxY = data.fold<int>(1, (m, d) => d.count > m ? d.count : m);
 
@@ -219,14 +225,14 @@ class _StatsScreenState extends State<StatsScreen> {
       height: 200,
       padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.07)),
+        border: Border.all(color: colors.border),
       ),
       child: data.every((d) => d.count == 0)
           ? Center(
               child: Text('Sin datos',
-                  style: TextStyle(color: Colors.grey[600])))
+                  style: TextStyle(color: colors.textHint)))
           : BarChart(
               BarChartData(
                 maxY: (maxY + 1).toDouble(),
@@ -236,14 +242,14 @@ class _StatsScreenState extends State<StatsScreen> {
                     barRods: [
                       BarChartRodData(
                         toY: e.value.count.toDouble(),
-                        color: const Color(0xFF7C3AED),
+                        color: AppPalette.accent,
                         width: 22,
                         borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(6)),
                         backDrawRodData: BackgroundBarChartRodData(
                           show: true,
                           toY: (maxY + 1).toDouble(),
-                          color: Colors.white.withOpacity(0.04),
+                          color: colors.border.withOpacity(0.3),
                         ),
                       ),
                     ],
@@ -271,7 +277,7 @@ class _StatsScreenState extends State<StatsScreen> {
                           child: Text(
                             label,
                             style: TextStyle(
-                                color: Colors.grey[500], fontSize: 11),
+                                color: colors.textHint, fontSize: 11),
                           ),
                         );
                       },
@@ -283,18 +289,18 @@ class _StatsScreenState extends State<StatsScreen> {
                   show: true,
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (_) => FlLine(
-                    color: Colors.white.withOpacity(0.06),
+                    color: colors.border,
                     strokeWidth: 1,
                   ),
                 ),
                 borderData: FlBorderData(show: false),
                 barTouchData: BarTouchData(
                   touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (_) => const Color(0xFF2A2A3E),
+                    getTooltipColor: (_) => colors.input,
                     getTooltipItem: (group, _, rod, __) => BarTooltipItem(
                       '${rod.toY.toInt()}',
-                      const TextStyle(
-                          color: Colors.white,
+                      TextStyle(
+                          color: colors.text,
                           fontWeight: FontWeight.bold,
                           fontSize: 13),
                     ),
@@ -306,18 +312,18 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   // ── Pie chart ──────────────────────────────────────────────────────────────
-  Widget _buildPieSection() {
+  Widget _buildPieSection(AppColors colors) {
     final top = _topMaterials;
     if (top.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: colors.card,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Center(
           child: Text('Sin datos',
-              style: TextStyle(color: Colors.grey[600])),
+              style: TextStyle(color: colors.textHint)),
         ),
       );
     }
@@ -327,9 +333,9 @@ class _StatsScreenState extends State<StatsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.07)),
+        border: Border.all(color: colors.border),
       ),
       child: Row(
         children: [
@@ -379,8 +385,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       Expanded(
                         child: Text(
                           e.value.key,
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 12),
+                          style: TextStyle(color: colors.text, fontSize: 12),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -388,7 +393,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       Text(
                         '×${e.value.value}',
                         style: TextStyle(
-                            color: Colors.grey[500],
+                            color: colors.textHint,
                             fontSize: 11,
                             fontWeight: FontWeight.bold),
                       ),
@@ -404,15 +409,15 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
-  Widget _sectionTitle(String title, IconData icon) {
+  Widget _sectionTitle(String title, IconData icon, AppColors colors) {
     return Row(
       children: [
-        Icon(icon, color: const Color(0xFF7C3AED), size: 18),
+        Icon(icon, color: AppPalette.accent, size: 18),
         const SizedBox(width: 8),
         Text(
           title,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: colors.text,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),

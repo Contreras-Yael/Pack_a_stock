@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/material_model.dart';
 import '../../models/cart_item_model.dart';
 import '../../services/cart_service.dart';
+import '../../config/app_colors.dart';
 
 class MaterialDetailScreen extends StatefulWidget {
   final MaterialItem material;
@@ -56,11 +57,12 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1E),
+      backgroundColor: colors.bg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Detalle del Material'),
+        backgroundColor: colors.card,
+        title: Text('Detalle del Material', style: TextStyle(color: colors.text)),
         elevation: 0,
       ),
       body: Column(
@@ -73,17 +75,17 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                   // Header con imagen/icono
                   Container(
                     width: double.infinity,
-                    color: const Color(0xFF1A1A2E),
+                    color: colors.card,
                     padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
                     child: Center(
                       child: Container(
                         width: 200,
                         height: 200,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0F0F1E),
+                          color: colors.bg,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: const Color(0xFF7C3AED).withOpacity(0.3),
+                            color: AppPalette.accent.withOpacity(0.3),
                             width: 2,
                           ),
                         ),
@@ -100,7 +102,7 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                                         ? child
                                         : const Center(
                                             child: CircularProgressIndicator(
-                                              color: Color(0xFF7C3AED),
+                                              color: AppPalette.accent,
                                               strokeWidth: 2,
                                             ),
                                           ),
@@ -118,10 +120,10 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                         // Nombre
                         Text(
                           widget.material.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: colors.text,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -133,14 +135,14 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1A1A2E),
+                            color: colors.card,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             'SKU: ${widget.material.sku}',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[400],
+                              color: colors.textSub,
                             ),
                           ),
                         ),
@@ -156,27 +158,29 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                                   ? 'Disponible'
                                   : 'No disponible',
                               color: widget.material.status == 'available'
-                                  ? const Color(0xFF10B981)
-                                  : const Color(0xFFEF4444),
+                                  ? AppPalette.success
+                                  : AppPalette.error,
+                              colors: colors,
                             ),
                             const SizedBox(width: 15),
                             _buildInfoCard(
                               icon: Icons.inventory,
                               label: 'Disponibles',
                               value: '${widget.material.availableQuantity}',
-                              color: const Color(0xFF3B82F6),
+                              color: AppPalette.info,
+                              colors: colors,
                             ),
                           ],
                         ),
                         const SizedBox(height: 20),
 
                         // Descripción
-                        const Text(
+                        Text(
                           'Descripción',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: colors.text,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -184,14 +188,14 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1A1A2E),
+                            color: colors.card,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             widget.material.description,
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[300],
+                              color: colors.textSub,
                               height: 1.5,
                             ),
                           ),
@@ -199,19 +203,19 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                         const SizedBox(height: 20),
 
                         // Selector de cantidad
-                        const Text(
+                        Text(
                           'Cantidad',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: colors.text,
                           ),
                         ),
                         const SizedBox(height: 10),
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1A1A2E),
+                            color: colors.card,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
@@ -221,7 +225,7 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                                 'Selecciona la cantidad',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.grey[400],
+                                  color: colors.textSub,
                                 ),
                               ),
                               Row(
@@ -231,7 +235,7 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                                         ? () => setState(() => _quantity--)
                                         : null,
                                     icon: const Icon(Icons.remove_circle_outline),
-                                    color: const Color(0xFF7C3AED),
+                                    color: AppPalette.accent,
                                   ),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
@@ -239,15 +243,15 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF0F0F1E),
+                                      color: colors.bg,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
                                       '$_quantity',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                        color: colors.text,
                                       ),
                                     ),
                                   ),
@@ -257,7 +261,7 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                                         ? () => setState(() => _quantity++)
                                         : null,
                                     icon: const Icon(Icons.add_circle_outline),
-                                    color: const Color(0xFF7C3AED),
+                                    color: AppPalette.accent,
                                   ),
                                 ],
                               ),
@@ -276,7 +280,7 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A2E),
+              color: colors.card,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.3),
@@ -294,7 +298,7 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                       ? _addToCart
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7C3AED),
+                    backgroundColor: AppPalette.accent,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -319,11 +323,11 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
 
   Widget _buildImagePlaceholder() {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF7C3AED),
-            const Color(0xFFA855F7).withOpacity(0.8),
+            AppPalette.accent,
+            AppPalette.accentLight,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -344,12 +348,13 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
     required String label,
     required String value,
     required Color color,
+    required AppColors colors,
   }) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: colors.card,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -360,7 +365,7 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey[400],
+                color: colors.textSub,
               ),
             ),
             const SizedBox(height: 4),

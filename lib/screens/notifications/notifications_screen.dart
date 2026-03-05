@@ -4,6 +4,7 @@ import '../../services/notification_service.dart';
 import '../../widgets/app_drawer.dart';
 import '../history/history_screen.dart';
 import '../loans/loans_screen.dart';
+import '../../config/app_colors.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -33,44 +34,47 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final notifications = _notificationService.notifications;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1E),
+      backgroundColor: colors.bg,
       drawer: const AppDrawer(currentRoute: 'notifications'),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Notificaciones'),
+        backgroundColor: colors.card,
+        title: Text('Notificaciones', style: TextStyle(color: colors.text)),
         elevation: 0,
         actions: [
           if (notifications.isNotEmpty)
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert),
+              icon: Icon(Icons.more_vert, color: colors.text),
               onSelected: (value) {
                 if (value == 'mark_all_read') {
                   _notificationService.markAllAsRead();
                 } else if (value == 'clear_all') {
-                  _showClearAllDialog();
+                  _showClearAllDialog(colors);
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'mark_all_read',
                   child: Row(
                     children: [
-                      Icon(Icons.done_all, size: 20),
-                      SizedBox(width: 10),
-                      Text('Marcar todas como leídas'),
+                      Icon(Icons.done_all, size: 20, color: colors.text),
+                      const SizedBox(width: 10),
+                      Text('Marcar todas como leídas',
+                          style: TextStyle(color: colors.text)),
                     ],
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'clear_all',
                   child: Row(
                     children: [
-                      Icon(Icons.delete_outline, size: 20),
-                      SizedBox(width: 10),
-                      Text('Limpiar todas'),
+                      Icon(Icons.delete_outline, size: 20, color: colors.text),
+                      const SizedBox(width: 10),
+                      Text('Limpiar todas',
+                          style: TextStyle(color: colors.text)),
                     ],
                   ),
                 ),
@@ -79,19 +83,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ],
       ),
       body: notifications.isEmpty
-          ? _buildEmptyState()
+          ? _buildEmptyState(colors)
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final notification = notifications[index];
-                return _buildNotificationCard(notification);
+                return _buildNotificationCard(notification, colors);
               },
             ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppColors colors) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -99,26 +103,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           Container(
             padding: const EdgeInsets.all(30),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A2E),
+              color: colors.card,
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFF7C3AED).withOpacity(0.3),
+                color: AppPalette.accent.withOpacity(0.3),
                 width: 2,
               ),
             ),
             child: const Icon(
               Icons.notifications_none,
               size: 60,
-              color: Color(0xFF7C3AED),
+              color: AppPalette.accent,
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'No hay notificaciones',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: colors.text,
             ),
           ),
           const SizedBox(height: 8),
@@ -127,7 +131,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[400],
+              color: colors.textSub,
             ),
           ),
         ],
@@ -135,7 +139,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  Widget _buildNotificationCard(NotificationItem notification) {
+  Widget _buildNotificationCard(NotificationItem notification, AppColors colors) {
     final color = _notificationService.getNotificationColor(notification.type);
     final icon = _notificationService.getNotificationIcon(notification.type);
     final timeAgo = _getTimeAgo(notification.timestamp);
@@ -146,7 +150,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       background: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFFEF4444),
+          color: AppPalette.error,
           borderRadius: BorderRadius.circular(12),
         ),
         alignment: Alignment.centerRight,
@@ -162,7 +166,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Notificación eliminada'),
-            backgroundColor: const Color(0xFF1A1A2E),
+            backgroundColor: colors.card,
             action: SnackBarAction(
               label: 'Deshacer',
               onPressed: () {
@@ -185,12 +189,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: notification.isRead
-                ? const Color(0xFF1A1A2E)
-                : const Color(0xFF1A1A2E).withOpacity(0.8),
+                ? colors.card
+                : colors.card,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: notification.isRead
-                  ? Colors.white.withOpacity(0.1)
+                  ? colors.border
                   : color.withOpacity(0.3),
               width: notification.isRead ? 1 : 2,
             ),
@@ -225,7 +229,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               fontWeight: notification.isRead
                                   ? FontWeight.w500
                                   : FontWeight.bold,
-                              color: Colors.white,
+                              color: colors.text,
                             ),
                           ),
                         ),
@@ -245,7 +249,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       notification.message,
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey[400],
+                        color: colors.textSub,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -253,7 +257,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       timeAgo,
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.grey[600],
+                        color: colors.textHint,
                       ),
                     ),
                   ],
@@ -306,36 +310,39 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
-  void _showClearAllDialog() {
+  void _showClearAllDialog(AppColors colors) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text(
-          'Limpiar Notificaciones',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          '¿Estás seguro de que deseas eliminar todas las notificaciones?',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+      builder: (context) {
+        final dlgColors = context.colors;
+        return AlertDialog(
+          backgroundColor: dlgColors.card,
+          title: Text(
+            'Limpiar Notificaciones',
+            style: TextStyle(color: dlgColors.text),
           ),
-          TextButton(
-            onPressed: () {
-              _notificationService.clearAll();
-              Navigator.pop(context);
-            },
-            child: const Text(
-              'Eliminar',
-              style: TextStyle(color: Colors.red),
+          content: Text(
+            '¿Estás seguro de que deseas eliminar todas las notificaciones?',
+            style: TextStyle(color: dlgColors.textSub),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
             ),
-          ),
-        ],
-      ),
+            TextButton(
+              onPressed: () {
+                _notificationService.clearAll();
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Eliminar',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

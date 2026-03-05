@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../models/loan_model.dart';
 import '../../services/loan_service.dart';
 import '../../widgets/app_drawer.dart';
+import '../../config/app_colors.dart';
 
 class ExtensionsScreen extends StatefulWidget {
   const ExtensionsScreen({super.key});
@@ -43,11 +44,13 @@ class _ExtensionsScreenState extends State<ExtensionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1E),
+      backgroundColor: colors.bg,
       drawer: const AppDrawer(currentRoute: 'extensions'),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: colors.card,
+        foregroundColor: colors.text,
         title: const Text('Mis Extensiones'),
         elevation: 0,
         actions: [
@@ -58,44 +61,44 @@ class _ExtensionsScreenState extends State<ExtensionsScreen> {
         ],
       ),
       body: _loading
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF7C3AED)))
+          ? Center(
+              child: CircularProgressIndicator(color: AppPalette.accent))
           : _extensions.isEmpty
-              ? _buildEmpty()
+              ? _buildEmpty(colors)
               : RefreshIndicator(
                   onRefresh: _loadData,
-                  color: const Color(0xFF7C3AED),
-                  backgroundColor: const Color(0xFF1A1A2E),
+                  color: AppPalette.accent,
+                  backgroundColor: colors.card,
                   child: ListView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                     itemCount: _extensions.length,
                     itemBuilder: (_, i) =>
-                        _buildCard(_extensions[i]),
+                        _buildCard(_extensions[i], colors),
                   ),
                 ),
     );
   }
 
-  Widget _buildEmpty() {
+  Widget _buildEmpty(AppColors colors) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.event_repeat_rounded,
-              size: 64, color: Colors.grey[700]),
+              size: 64, color: colors.textHint),
           const SizedBox(height: 16),
           Text('No has solicitado extensiones',
-              style: TextStyle(fontSize: 16, color: Colors.grey[400])),
+              style: TextStyle(fontSize: 16, color: colors.textSub)),
           const SizedBox(height: 6),
           Text('Puedes solicitarlas desde el detalle de un préstamo',
-              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 13, color: colors.textHint),
               textAlign: TextAlign.center),
         ],
       ),
     );
   }
 
-  Widget _buildCard(LoanExtension ext) {
+  Widget _buildCard(LoanExtension ext, AppColors colors) {
     final info = _statusInfo(ext.status);
     final color = info['color'] as Color;
     final loan = _loansById[ext.loanId];
@@ -104,7 +107,7 @@ class _ExtensionsScreenState extends State<ExtensionsScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
@@ -137,17 +140,17 @@ class _ExtensionsScreenState extends State<ExtensionsScreen> {
                     children: [
                       Text(
                         loan?.materialName ?? 'Préstamo #${ext.loanId}',
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white),
+                            color: colors.text),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         'Extensión #${ext.id}',
                         style: TextStyle(
-                            fontSize: 11, color: Colors.grey[500]),
+                            fontSize: 11, color: colors.textHint),
                       ),
                     ],
                   ),
@@ -180,6 +183,7 @@ class _ExtensionsScreenState extends State<ExtensionsScreen> {
                   Icons.event_available_rounded,
                   'Nueva fecha solicitada',
                   fmt.format(ext.newReturnDate),
+                  colors,
                 ),
                 if (loan != null) ...[
                   const SizedBox(height: 8),
@@ -187,6 +191,7 @@ class _ExtensionsScreenState extends State<ExtensionsScreen> {
                     Icons.inventory_2_outlined,
                     'Fecha original',
                     fmt.format(loan.expectedReturnDate),
+                    colors,
                   ),
                 ],
                 if (ext.reason != null && ext.reason!.isNotEmpty) ...[
@@ -195,6 +200,7 @@ class _ExtensionsScreenState extends State<ExtensionsScreen> {
                     Icons.comment_outlined,
                     'Motivo',
                     ext.reason!,
+                    colors,
                   ),
                 ],
               ],
@@ -205,21 +211,20 @@ class _ExtensionsScreenState extends State<ExtensionsScreen> {
     );
   }
 
-  Widget _infoRow(IconData icon, String label, String value) {
+  Widget _infoRow(IconData icon, String label, String value, AppColors colors) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 14, color: const Color(0xFF7C3AED)),
+        Icon(icon, size: 14, color: AppPalette.accent),
         const SizedBox(width: 8),
         Text('$label: ',
-            style:
-                TextStyle(fontSize: 12, color: Colors.grey[500])),
+            style: TextStyle(fontSize: 12, color: colors.textHint)),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 12,
-                color: Colors.white,
+                color: colors.text,
                 fontWeight: FontWeight.w500),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -233,17 +238,17 @@ class _ExtensionsScreenState extends State<ExtensionsScreen> {
     return switch (status) {
       'approved' => {
           'label': 'Aprobada',
-          'color': const Color(0xFF10B981),
+          'color': AppPalette.success,
           'icon': Icons.check_circle_outline_rounded,
         },
       'rejected' => {
           'label': 'Rechazada',
-          'color': const Color(0xFFEF4444),
+          'color': AppPalette.error,
           'icon': Icons.cancel_outlined,
         },
       _ => {
           'label': 'Pendiente',
-          'color': const Color(0xFFF59E0B),
+          'color': AppPalette.warning,
           'icon': Icons.hourglass_top_rounded,
         },
     };
