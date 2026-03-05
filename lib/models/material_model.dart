@@ -9,6 +9,7 @@ class MaterialItem {
   final String status;
   final String? imageUrl;
   final String? categoryName;
+  final String? locationName;
   final bool isConsumable;
   final bool isLowStock;
 
@@ -23,6 +24,7 @@ class MaterialItem {
     required this.status,
     this.imageUrl,
     this.categoryName,
+    this.locationName,
     this.isConsumable = false,
     this.isLowStock = false,
   });
@@ -46,6 +48,7 @@ class MaterialItem {
       status: json['status'] ?? 'unknown',
       imageUrl: json['image'] as String?,
       categoryName: json['category_name'] as String?,
+      locationName: json['location_name'] as String?,
       isConsumable: isConsumable,
       isLowStock: json['is_low_stock'] as bool? ?? false,
     );

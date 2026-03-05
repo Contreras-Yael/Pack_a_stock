@@ -172,6 +172,43 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 12),
+
+                        // Ubicación
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: colors.card,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.location_on_outlined, color: AppPalette.accent, size: 22),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Ubicación',
+                                    style: TextStyle(fontSize: 12, color: colors.textSub),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    widget.material.locationName ?? 'Sin ubicación asignada',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: widget.material.locationName != null
+                                          ? colors.text
+                                          : colors.textHint,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                         const SizedBox(height: 20),
 
                         // Descripción
