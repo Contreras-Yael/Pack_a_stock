@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/loan_model.dart';
@@ -21,17 +22,20 @@ class _LoansScreenState extends State<LoansScreen>
   List<Loan> _allLoans = [];
   bool _loading = true;
   String? _error;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _loadLoans();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 60), (_) => _loadLoans());
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _refreshTimer?.cancel();
     super.dispose();
   }
 
