@@ -666,14 +666,16 @@ class _HistoryScreenState extends State<HistoryScreen>
         children: [
           Icon(icon, size: 16, color: colors.textHint),
           const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label,
-                  style: TextStyle(color: colors.textHint, fontSize: 11)),
-              Text(value,
-                  style: TextStyle(color: colors.text, fontSize: 14)),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: TextStyle(color: colors.textHint, fontSize: 11)),
+                Text(value,
+                    style: TextStyle(color: colors.text, fontSize: 14)),
+              ],
+            ),
           ),
         ],
       ),

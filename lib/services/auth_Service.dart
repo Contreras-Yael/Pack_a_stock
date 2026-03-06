@@ -62,7 +62,9 @@ class AuthService {
         final userJson = data['data']['user'];
         await _storage.saveToken(tokens['access']);
         await _storage.saveRefreshToken(tokens['refresh']);
-        return {'success': true, 'user': User.fromJson(userJson)};
+        final user = User.fromJson(userJson);
+        await _storage.saveUserId(user.id.toString());
+        return {'success': true, 'user': user};
       } else {
         final errors = data['errors'];
         String message = 'Credenciales incorrectas';

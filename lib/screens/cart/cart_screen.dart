@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../models/cart_item_model.dart';
 import '../../services/cart_service.dart';
 import '../order/order_confirmation_screen.dart';
+import '../catalog/catalog_screen.dart';
 import '../../widgets/app_drawer.dart';
 import '../../config/app_colors.dart';
 
@@ -208,9 +209,9 @@ class _CartScreenState extends State<CartScreen> {
           ),
           const SizedBox(height: 30),
           ElevatedButton.icon(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.qr_code_scanner),
-            label: const Text('Escanear QR'),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CatalogScreen())),
+            icon: const Icon(Icons.inventory_2_outlined),
+            label: const Text('Ver Catálogo'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppPalette.accent,
               foregroundColor: Colors.white,

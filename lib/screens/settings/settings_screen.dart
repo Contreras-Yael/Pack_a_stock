@@ -82,8 +82,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   // ── Cuenta ──────────────────────────────────────────────
                   _sectionTitle('Cuenta', colors),
                   const SizedBox(height: 12),
-                  _buildUserCard(colors),
-                  const SizedBox(height: 10),
                   _buildActionTile(
                     colors: colors,
                     icon: Icons.lock_outline,

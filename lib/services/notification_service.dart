@@ -93,9 +93,11 @@ class NotificationService extends ChangeNotifier {
   Timer? _pollingTimer;
   final StorageService _storage = StorageService();
 
-  static const String _persistKey = 'persisted_notifications';
   static const int _maxPersisted = 50;
   static const Duration _notificationTtl = Duration(days: 7);
+  String _userPrefix = 'guest';
+
+  String get _persistKey => '${_userPrefix}_persisted_notifications';
 
   // ─── Getters ──────────────────────────────────────────────────────────────
   List<NotificationItem> get notifications => List.unmodifiable(_notifications);
@@ -140,8 +142,15 @@ class NotificationService extends ChangeNotifier {
   // ─── Polling ──────────────────────────────────────────────────────────────
   void startPolling({int daysBeforeExpiration = 3}) {
     _pollingTimer?.cancel();
-    // Load persisted notifications first, then start polling
-    _loadPersistedNotifications().then((_) {
+    _storage.getUserId().then((uid) async {
+      final newPrefix = uid ?? 'guest';
+      // Si cambió el usuario, limpiar notificaciones en memoria
+      if (newPrefix != _userPrefix) {
+        _notifications.clear();
+        _userPrefix = newPrefix;
+        notifyListeners();
+      }
+      await _loadPersistedNotifications();
       _poll(daysBeforeExpiration);
     });
     _pollingTimer = Timer.periodic(
@@ -185,7 +194,7 @@ class NotificationService extends ChangeNotifier {
 
     // Set global de claves ya notificadas (requests + extensions comparten este set)
     final Set<String> notifiedSet = Set<String>.from(
-      (jsonDecode(prefs.getString('notified_requests') ?? '[]') as List)
+      (jsonDecode(prefs.getString('${_userPrefix}_notified_requests') ?? '[]') as List)
           .cast<String>(),
     );
 
@@ -247,14 +256,14 @@ class NotificationService extends ChangeNotifier {
 
         final Map<String, String> lastLoanStatus =
             Map<String, String>.from(jsonDecode(
-          prefs.getString('last_loan_statuses') ?? '{}',
+          prefs.getString('${_userPrefix}_last_loan_statuses') ?? '{}',
         ));
         final Map<String, String> newLoanStatus = {};
         final now = DateTime.now();
 
         // Ids de préstamos que ya conocemos (para detectar nuevos)
         final Set<String> knownLoanIds = Set<String>.from(
-          (jsonDecode(prefs.getString('known_loan_ids') ?? '[]') as List)
+          (jsonDecode(prefs.getString('${_userPrefix}_known_loan_ids') ?? '[]') as List)
               .cast<String>(),
         );
         final bool isFirstPoll = knownLoanIds.isEmpty;
@@ -310,7 +319,7 @@ class NotificationService extends ChangeNotifier {
               if (returnDate != null) {
                 final daysLeft = returnDate.difference(now).inDays;
                 if (daysLeft >= 0 && daysLeft <= daysBeforeExpiration) {
-                  final alertKey = 'expiry_alerted_${id}_$daysLeft';
+                  final alertKey = '${_userPrefix}_expiry_alerted_${id}_$daysLeft';
                   if (!prefs.containsKey(alertKey)) {
                     await prefs.setBool(alertKey, true);
                     final dayStr = daysLeft == 0
@@ -331,9 +340,9 @@ class NotificationService extends ChangeNotifier {
         }
 
         await prefs.setString(
-            'last_loan_statuses', jsonEncode(newLoanStatus));
+            '${_userPrefix}_last_loan_statuses', jsonEncode(newLoanStatus));
         await prefs.setString(
-            'known_loan_ids', jsonEncode(knownLoanIds.toList()));
+            '${_userPrefix}_known_loan_ids', jsonEncode(knownLoanIds.toList()));
       } catch (_) {}
     }
 
@@ -402,7 +411,7 @@ class NotificationService extends ChangeNotifier {
         final String? blockedUntil = userJson['blocked_until'] as String?;
 
         final bool wasBlocked =
-            prefs.getBool('was_blocked') ?? false;
+            prefs.getBool('${_userPrefix}_was_blocked') ?? false;
 
         if (isBlocked && !wasBlocked) {
           // Recién penalizado
@@ -433,13 +442,13 @@ class NotificationService extends ChangeNotifier {
           );
         }
 
-        await prefs.setBool('was_blocked', isBlocked);
+        await prefs.setBool('${_userPrefix}_was_blocked', isBlocked);
       } catch (_) {}
     }
 
     // Guardar el set combinado de notificaciones
     await prefs.setString(
-        'notified_requests', jsonEncode(notifiedSet.toList()));
+        '${_userPrefix}_notified_requests', jsonEncode(notifiedSet.toList()));
   }
 
   // ─── Notification management ───────────────────────────────────────────────

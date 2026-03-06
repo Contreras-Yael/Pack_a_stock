@@ -67,7 +67,7 @@ class LoanService {
   Future<List<LoanExtension>> getMyExtensions({int? loanId}) async {
     try {
       final headers = await _authHeaders();
-      var urlStr = '${ApiConfig.baseUrl}/loans/loan-extensions/';
+      var urlStr = '${ApiConfig.baseUrl}/loans/loan-extensions/my_extensions/';
       if (loanId != null) urlStr += '?loan=$loanId';
       final url = Uri.parse(urlStr);
       final response = await http.get(url, headers: headers);

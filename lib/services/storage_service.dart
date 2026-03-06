@@ -24,4 +24,10 @@ class StorageService {
     final token = await getToken();
     return token != null && token.isNotEmpty;
   }
+
+  Future<void> saveUserId(String id) async =>
+      _storage.write(key: 'user_id', value: id);
+
+  Future<String?> getUserId() async =>
+      _storage.read(key: 'user_id');
 }
