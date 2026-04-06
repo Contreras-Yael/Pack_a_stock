@@ -28,10 +28,9 @@ class OrderService {
     final url = Uri.parse('${ApiConfig.baseUrl}/loans/loan-requests/');
 
     final body = {
-      'desired_pickup_date': pickupDate.toIso8601String().split('T').first,
+      'desired_pickup_date': pickupDate.toIso8601String(),
       if (returnDate != null)
-        'desired_return_date':
-            returnDate.toIso8601String().split('T').first,
+        'desired_return_date': returnDate.toIso8601String(),
       if (purpose != null && purpose.isNotEmpty) 'purpose': purpose,
       'items': items
           .map((item) => {

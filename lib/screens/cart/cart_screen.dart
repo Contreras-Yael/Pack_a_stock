@@ -35,8 +35,16 @@ class _CartScreenState extends State<CartScreen> {
         ),
       );
 
+  Future<TimeOfDay?> _pickTime({TimeOfDay? initial}) async {
+    return showTimePicker(
+      context: context,
+      initialTime: initial ?? const TimeOfDay(hour: 9, minute: 0),
+      builder: (context, child) => Theme(data: _datePickerTheme, child: child!),
+    );
+  }
+
   Future<void> _selectPickupDate() async {
-    final DateTime? picked = await showDatePicker(
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now().add(const Duration(days: 1)),
       firstDate: DateTime.now().add(const Duration(days: 1)),
@@ -45,20 +53,32 @@ class _CartScreenState extends State<CartScreen> {
           Theme(data: _datePickerTheme, child: child!),
     );
 
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-        // Reset return date if it's before the new pickup date
-        if (_returnDate != null && !_returnDate!.isAfter(picked)) {
-          _returnDate = null;
-        }
-      });
-    }
+    if (pickedDate == null) return;
+
+    final TimeOfDay? pickedTime = await _pickTime(
+      initial: _selectedDate != null
+          ? TimeOfDay.fromDateTime(_selectedDate!)
+          : const TimeOfDay(hour: 9, minute: 0),
+    );
+
+    if (pickedTime == null) return;
+
+    final picked = DateTime(
+      pickedDate.year, pickedDate.month, pickedDate.day,
+      pickedTime.hour, pickedTime.minute,
+    );
+
+    setState(() {
+      _selectedDate = picked;
+      if (_returnDate != null && !_returnDate!.isAfter(picked)) {
+        _returnDate = null;
+      }
+    });
   }
 
   Future<void> _selectReturnDate() async {
     final firstReturn = (_selectedDate ?? DateTime.now()).add(const Duration(days: 1));
-    final DateTime? picked = await showDatePicker(
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: firstReturn,
       firstDate: firstReturn,
@@ -67,9 +87,22 @@ class _CartScreenState extends State<CartScreen> {
           Theme(data: _datePickerTheme, child: child!),
     );
 
-    if (picked != null) {
-      setState(() => _returnDate = picked);
-    }
+    if (pickedDate == null) return;
+
+    final TimeOfDay? pickedTime = await _pickTime(
+      initial: _returnDate != null
+          ? TimeOfDay.fromDateTime(_returnDate!)
+          : const TimeOfDay(hour: 18, minute: 0),
+    );
+
+    if (pickedTime == null) return;
+
+    setState(() {
+      _returnDate = DateTime(
+        pickedDate.year, pickedDate.month, pickedDate.day,
+        pickedTime.hour, pickedTime.minute,
+      );
+    });
   }
 
   void _proceedToCheckout() {
@@ -405,7 +438,7 @@ class _CartScreenState extends State<CartScreen> {
                 const SizedBox(width: 12),
                 Text(
                   value != null
-                      ? DateFormat('dd/MM/yyyy').format(value)
+                      ? DateFormat('dd/MM/yyyy HH:mm').format(value)
                       : hint,
                   style: TextStyle(
                     fontSize: 16,
@@ -420,7 +453,7 @@ class _CartScreenState extends State<CartScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 6),
             child: Text(
-              DateFormat('EEEE d \'de\' MMMM', 'es').format(value),
+              DateFormat("EEEE d 'de' MMMM · HH:mm 'hrs'", 'es').format(value),
               style: TextStyle(fontSize: 12, color: colors.textSub),
             ),
           ),
