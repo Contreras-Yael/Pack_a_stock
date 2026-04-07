@@ -112,6 +112,50 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                     ),
                   ),
 
+                  // Banner bloqueado
+                  if (widget.material.isLocked)
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AppPalette.error.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: AppPalette.error.withOpacity(0.4)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.lock_outline_rounded,
+                              color: AppPalette.error, size: 20),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Material bloqueado',
+                                  style: TextStyle(
+                                    color: AppPalette.error,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'La ubicación de este material excede el límite de tu plan actual. Renueva tu suscripción para poder solicitarlo.',
+                                  style: TextStyle(
+                                    color: AppPalette.error.withOpacity(0.8),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
                   Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
@@ -331,23 +375,39 @@ class _MaterialDetailScreenState extends State<MaterialDetailScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: widget.material.status == 'available'
-                      ? _addToCart
-                      : null,
+                  onPressed: widget.material.isLocked
+                      ? null
+                      : widget.material.status == 'available'
+                          ? _addToCart
+                          : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppPalette.accent,
+                    backgroundColor: widget.material.isLocked
+                        ? AppPalette.error.withOpacity(0.5)
+                        : AppPalette.accent,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Agregar al Carrito',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (widget.material.isLocked)
+                        const Icon(Icons.lock_outline_rounded,
+                            size: 18, color: Colors.white70),
+                      if (widget.material.isLocked)
+                        const SizedBox(width: 8),
+                      Text(
+                        widget.material.isLocked
+                            ? 'No disponible — plan requerido'
+                            : 'Agregar al Carrito',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

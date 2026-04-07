@@ -572,19 +572,45 @@ class _CatalogScreenState extends State<CatalogScreen> {
         available ? AppPalette.success : AppPalette.error;
 
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (_) => MaterialDetailScreen(material: m)),
-      ),
+      onTap: () {
+        if (m.isLocked) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.lock_outline_rounded, color: Colors.white, size: 18),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Material bloqueado — la ubicación excede el límite de tu plan',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: AppPalette.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+          return;
+        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => MaterialDetailScreen(material: m)),
+        );
+      },
       child: Container(
         decoration: BoxDecoration(
-          color: colors.card,
+          color: m.isLocked ? colors.card.withOpacity(0.6) : colors.card,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: m.isLowStock
-                ? AppPalette.warning.withOpacity(0.35)
-                : colors.border,
+            color: m.isLocked
+                ? AppPalette.error.withOpacity(0.4)
+                : m.isLowStock
+                    ? AppPalette.warning.withOpacity(0.35)
+                    : colors.border,
           ),
         ),
         clipBehavior: Clip.antiAlias,
@@ -625,26 +651,51 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     ),
                   ),
 
-                  // Status badge — top right
+                  // Status / locked badge — top right
                   Positioned(
                     top: 8,
                     right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.88),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        available ? 'Disponible' : 'No disponible',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                    child: m.isLocked
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppPalette.error.withOpacity(0.88),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.lock_outline_rounded,
+                                    size: 9, color: Colors.white),
+                                SizedBox(width: 3),
+                                Text(
+                                  'Bloqueado',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: statusColor.withOpacity(0.88),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              available ? 'Disponible' : 'No disponible',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                   ),
 
                   // Consumable / low-stock icon — top left
