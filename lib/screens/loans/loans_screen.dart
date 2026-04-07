@@ -231,7 +231,7 @@ class _LoansScreenState extends State<LoansScreen>
                   // Current return date
                   _infoRow(
                     'Fecha actual de devolución',
-                    DateFormat('dd MMM yyyy', 'es').format(loan.expectedReturnDate),
+                    DateFormat("dd MMM yyyy · HH:mm'h'", 'es').format(loan.expectedReturnDate.toLocal()),
                     Icons.event,
                     AppPalette.warning,
                     sheetColors,
@@ -241,7 +241,7 @@ class _LoansScreenState extends State<LoansScreen>
                   // New date selector
                   GestureDetector(
                     onTap: () async {
-                      final picked = await showDatePicker(
+                      final pickedDate = await showDatePicker(
                         context: ctx,
                         initialDate: selectedDate,
                         firstDate: loan.expectedReturnDate.add(const Duration(days: 1)),
@@ -258,9 +258,25 @@ class _LoansScreenState extends State<LoansScreen>
                           );
                         },
                       );
-                      if (picked != null) {
-                        setModalState(() => selectedDate = picked);
-                      }
+                      if (pickedDate == null) return;
+                      final pickedTime = await showTimePicker(
+                        context: ctx,
+                        initialTime: TimeOfDay.fromDateTime(selectedDate),
+                        builder: (context, child) => Theme(
+                          data: ThemeData.dark().copyWith(
+                            colorScheme: const ColorScheme.dark(
+                              primary: AppPalette.accent,
+                              surface: Color(0xFF1A1A2E),
+                            ),
+                          ),
+                          child: child!,
+                        ),
+                      );
+                      if (pickedTime == null) return;
+                      setModalState(() => selectedDate = DateTime(
+                        pickedDate.year, pickedDate.month, pickedDate.day,
+                        pickedTime.hour, pickedTime.minute,
+                      ));
                     },
                     child: Container(
                       padding: const EdgeInsets.all(14),
@@ -283,7 +299,7 @@ class _LoansScreenState extends State<LoansScreen>
                                     color: sheetColors.textSub, fontSize: 12),
                               ),
                               Text(
-                                DateFormat('dd MMM yyyy', 'es').format(selectedDate),
+                                DateFormat("dd MMM yyyy · HH:mm'h'", 'es').format(selectedDate.toLocal()),
                                 style: TextStyle(
                                   color: sheetColors.text,
                                   fontSize: 16,
@@ -621,8 +637,8 @@ class _LoanCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          DateFormat('dd MMM yyyy', 'es')
-                              .format(loan.expectedReturnDate),
+                          DateFormat("dd MMM yyyy · HH:mm'h'", 'es')
+                              .format(loan.expectedReturnDate.toLocal()),
                           style:
                               TextStyle(color: colors.textSub, fontSize: 12),
                         ),
@@ -653,7 +669,7 @@ class _LoanCard extends StatelessWidget {
                     Icon(Icons.event, size: 14, color: colors.textHint),
                     const SizedBox(width: 4),
                     Text(
-                      '${loan.isConsumable ? 'Recibido' : 'Devuelto'}: ${loan.actualReturnDate != null ? DateFormat('dd MMM yyyy', 'es').format(loan.actualReturnDate!) : '-'}',
+                      '${loan.isConsumable ? 'Recibido' : 'Devuelto'}: ${loan.actualReturnDate != null ? DateFormat("dd MMM yyyy · HH:mm'h'", 'es').format(loan.actualReturnDate!.toLocal()) : '-'}',
                       style:
                           TextStyle(color: colors.textSub, fontSize: 12),
                     ),
@@ -673,7 +689,7 @@ class _LoanCard extends StatelessWidget {
                       size: 14, color: colors.textHint),
                   const SizedBox(width: 4),
                   Text(
-                    'Desde: ${DateFormat('dd MMM', 'es').format(loan.issuedAt)}',
+                    'Desde: ${DateFormat("dd MMM · HH:mm'h'", 'es').format(loan.issuedAt.toLocal())}',
                     style: TextStyle(color: colors.textSub, fontSize: 12),
                   ),
                   const Spacer(),

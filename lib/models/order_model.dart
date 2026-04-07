@@ -46,7 +46,8 @@ class Order {
 
   Map<String, dynamic> toJson() {
     return {
-      'desired_pickup_date': pickupDate?.toIso8601String().split('T').first,
+      'desired_pickup_date': pickupDate?.toIso8601String(),
+      'desired_return_date': returnDate?.toIso8601String(),
       'items': items.map((item) => item.toJson()).toList(),
     };
   }

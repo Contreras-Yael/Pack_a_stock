@@ -272,7 +272,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
           _buildInfoCard(
             icon: Icons.calendar_today,
             title: 'Fecha de Retiro',
-            value: DateFormat('dd/MM/yyyy').format(widget.pickupDate),
+            value: DateFormat("dd/MM/yyyy · HH:mm'h'").format(widget.pickupDate),
             color: AppPalette.info,
             colors: colors,
           ),
@@ -280,7 +280,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
           _buildInfoCard(
             icon: Icons.event_available,
             title: 'Fecha de Devolución',
-            value: DateFormat('dd/MM/yyyy').format(widget.returnDate),
+            value: DateFormat("dd/MM/yyyy · HH:mm'h'").format(widget.returnDate),
             color: AppPalette.success,
             colors: colors,
           ),

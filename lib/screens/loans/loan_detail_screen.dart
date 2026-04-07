@@ -53,7 +53,7 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final loan = widget.loan;
-    final fmt = DateFormat('dd MMM yyyy', 'es');
+    final fmt = DateFormat("dd MMM yyyy · HH:mm'h'", 'es');
 
     return Scaffold(
       backgroundColor: colors.bg,
@@ -152,20 +152,20 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
               _InfoItem(
                 icon: Icons.calendar_today,
                 label: 'Fecha inicio',
-                value: fmt.format(loan.issuedAt),
+                value: fmt.format(loan.issuedAt.toLocal()),
                 color: AppPalette.success,
               ),
               _InfoItem(
                 icon: Icons.event,
                 label: 'Devolución esperada',
-                value: fmt.format(loan.expectedReturnDate),
+                value: fmt.format(loan.expectedReturnDate.toLocal()),
                 color: AppPalette.warning,
               ),
               if (loan.actualReturnDate != null)
                 _InfoItem(
                   icon: Icons.check_circle_outline,
                   label: 'Devuelto el',
-                  value: fmt.format(loan.actualReturnDate!),
+                  value: fmt.format(loan.actualReturnDate!.toLocal()),
                   color: AppPalette.success,
                 ),
               if (loan.condition != null && loan.condition!.isNotEmpty)
@@ -478,7 +478,7 @@ class _ExtensionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final fmt = DateFormat('dd MMM yyyy', 'es');
+    final fmt = DateFormat("dd MMM yyyy · HH:mm'h'", 'es');
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
@@ -503,7 +503,7 @@ class _ExtensionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Nueva fecha: ${fmt.format(extension.newReturnDate)}',
+                  'Nueva fecha: ${fmt.format(extension.newReturnDate.toLocal())}',
                   style: TextStyle(
                     color: colors.text,
                     fontSize: 14,

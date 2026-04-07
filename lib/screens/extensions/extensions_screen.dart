@@ -102,7 +102,7 @@ class _ExtensionsScreenState extends State<ExtensionsScreen> {
     final info = _statusInfo(ext.status);
     final color = info['color'] as Color;
     final loan = _loansById[ext.loanId];
-    final fmt = DateFormat('dd MMM yyyy', 'es');
+    final fmt = DateFormat("dd MMM yyyy · HH:mm'h'", 'es');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -182,7 +182,7 @@ class _ExtensionsScreenState extends State<ExtensionsScreen> {
                 _infoRow(
                   Icons.event_available_rounded,
                   'Nueva fecha solicitada',
-                  fmt.format(ext.newReturnDate),
+                  fmt.format(ext.newReturnDate.toLocal()),
                   colors,
                 ),
                 if (loan != null) ...[
@@ -190,7 +190,7 @@ class _ExtensionsScreenState extends State<ExtensionsScreen> {
                   _infoRow(
                     Icons.inventory_2_outlined,
                     'Fecha original',
-                    fmt.format(loan.expectedReturnDate),
+                    fmt.format(loan.expectedReturnDate.toLocal()),
                     colors,
                   ),
                 ],
