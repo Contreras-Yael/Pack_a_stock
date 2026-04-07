@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pack_a_stock/services/auth_service.dart';
+import '../../services/firebase_auth_service.dart';
 import '../../services/notification_service.dart';
 import '../../config/app_colors.dart';
 import '../home/home_screen.dart';
@@ -16,8 +17,10 @@ class _PantallaLoginState extends State<PantallaLogin> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
   final AuthService _authService = AuthService();
+  final FirebaseAuthService _firebaseAuth = FirebaseAuthService();
 
   bool _isLoading = false;
+  bool _googleLoading = false;
   bool _obscurePassword = true;
   String _message = '';
 
@@ -26,6 +29,103 @@ class _PantallaLoginState extends State<PantallaLogin> {
     _emailController.dispose();
     _passController.dispose();
     super.dispose();
+  }
+
+  void _handleGoogleLogin() async {
+    setState(() {
+      _googleLoading = true;
+      _message = '';
+    });
+
+    final result = await _firebaseAuth.loginWithGoogle();
+
+    if (!mounted) return;
+    setState(() => _googleLoading = false);
+
+    if (result['success'] == true) {
+      NotificationService().startPolling();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else if (result['needs_company_code'] == true) {
+      // Empleado nuevo — pedir código de empresa
+      _showCompanyCodeDialog(result['firebase_token'], result['full_name']);
+    } else {
+      setState(() => _message = result['message'] ?? 'Error al iniciar sesión con Google');
+    }
+  }
+
+  void _showCompanyCodeDialog(String firebaseToken, String fullName) {
+    final codeController = TextEditingController();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.colors.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Código de empresa',
+            style: TextStyle(color: context.colors.text, fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Ingresa el código de tu empresa para completar el registro.',
+                style: TextStyle(color: context.colors.textSub, fontSize: 13)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: codeController,
+              textCapitalization: TextCapitalization.characters,
+              style: TextStyle(color: context.colors.text),
+              decoration: InputDecoration(
+                labelText: 'Código de empresa',
+                labelStyle: TextStyle(color: context.colors.textHint),
+                filled: true,
+                fillColor: context.colors.bg,
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: AppPalette.accent, width: 2)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancelar', style: TextStyle(color: context.colors.textSub)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final code = codeController.text.trim().toUpperCase();
+              if (code.isEmpty) return;
+              Navigator.pop(ctx);
+              setState(() => _googleLoading = true);
+              final result = await _firebaseAuth.registerWithGoogle(companyCode: code);
+              if (!mounted) return;
+              setState(() => _googleLoading = false);
+              if (result['success'] == true) {
+                NotificationService().startPolling();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                );
+              } else {
+                setState(() => _message = result['message'] ?? 'Error al registrarse');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppPalette.accent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Continuar'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _handleLogin() async {
@@ -210,6 +310,55 @@ class _PantallaLoginState extends State<PantallaLogin> {
                             'Iniciar Sesión',
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                ),
+                const SizedBox(height: 16),
+
+                // Divider
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: colors.textHint.withOpacity(0.3))),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('o continua con',
+                          style: TextStyle(color: colors.textHint, fontSize: 12)),
+                    ),
+                    Expanded(child: Divider(color: colors.textHint.withOpacity(0.3))),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Google button
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: _googleLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(color: AppPalette.accent))
+                      : OutlinedButton.icon(
+                          onPressed: _handleGoogleLogin,
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: colors.textHint.withOpacity(0.4)),
+                            backgroundColor: colors.card,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: Image.asset(
+                            'assets/images/google_logo.png',
+                            width: 20,
+                            height: 20,
+                            errorBuilder: (_, __, ___) =>
+                                const Icon(Icons.g_mobiledata, size: 24, color: Colors.red),
+                          ),
+                          label: Text(
+                            'Continuar con Google',
+                            style: TextStyle(
+                              color: colors.text,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                 ),

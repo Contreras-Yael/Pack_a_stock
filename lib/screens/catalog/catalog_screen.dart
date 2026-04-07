@@ -117,6 +117,12 @@ class _CatalogScreenState extends State<CatalogScreen> {
     super.dispose();
   }
 
+  String _formatDate(DateTime date) {
+    const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun',
+                    'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
   Future<void> _loadMaterials() async {
     setState(() => _loading = true);
     final materials = await _materialService.getMaterials();
@@ -744,6 +750,25 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         ),
                       ],
                     ),
+                    if (!available && m.nextAvailableDate != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.schedule_rounded,
+                                size: 10, color: Color(0xFFF59E0B)),
+                            const SizedBox(width: 3),
+                            Text(
+                              'Disp. ${_formatDate(m.nextAvailableDate!)}',
+                              style: const TextStyle(
+                                color: Color(0xFFF59E0B),
+                                fontSize: 9,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                   ],
                 ),
               ),

@@ -12,6 +12,7 @@ class MaterialItem {
   final String? locationName;
   final bool isConsumable;
   final bool isLowStock;
+  final DateTime? nextAvailableDate;
 
   MaterialItem({
     required this.id,
@@ -27,6 +28,7 @@ class MaterialItem {
     this.locationName,
     this.isConsumable = false,
     this.isLowStock = false,
+    this.nextAvailableDate,
   });
 
   bool get isAvailable => status == 'available' && availableQuantity > 0;
@@ -51,6 +53,9 @@ class MaterialItem {
       locationName: json['location_name'] as String?,
       isConsumable: isConsumable,
       isLowStock: json['is_low_stock'] as bool? ?? false,
+      nextAvailableDate: json['next_available_date'] != null
+          ? DateTime.tryParse(json['next_available_date'])
+          : null,
     );
   }
 }
