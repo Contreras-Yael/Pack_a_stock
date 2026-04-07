@@ -81,6 +81,24 @@ class AuthService {
     }
   }
 
+  // ─── Check Auth Method ───────────────────────────────────────────────────
+  Future<Map<String, dynamic>> checkAuthMethod(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/auth/check-method/'),
+        headers: ApiConfig.headers,
+        body: jsonEncode({'email': email}),
+      );
+      final data = json.decode(response.body);
+      return {
+        'exists': data['exists'] ?? false,
+        'uses_google': data['uses_google'] ?? false,
+      };
+    } catch (_) {
+      return {'exists': false, 'uses_google': false};
+    }
+  }
+
   // ─── Register Employee ────────────────────────────────────────────────────
   Future<Map<String, dynamic>> registerEmployee({
     required String email,

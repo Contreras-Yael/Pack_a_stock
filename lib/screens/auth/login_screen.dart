@@ -22,6 +22,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
   bool _isLoading = false;
   bool _googleLoading = false;
   bool _obscurePassword = true;
+  bool _googleHint = false;
   String _message = '';
 
   @override
@@ -129,7 +130,10 @@ class _PantallaLoginState extends State<PantallaLogin> {
   }
 
   void _handleLogin() async {
-    setState(() => _message = '');
+    setState(() {
+      _message = '';
+      _googleHint = false;
+    });
 
     if (_emailController.text.trim().isEmpty ||
         _passController.text.trim().isEmpty) {
@@ -154,7 +158,20 @@ class _PantallaLoginState extends State<PantallaLogin> {
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
-      setState(() => _message = result['message'] ?? 'Error al iniciar sesión');
+      // Check if this account uses Google Sign-In
+      final check = await _authService.checkAuthMethod(_emailController.text.trim());
+      if (!mounted) return;
+      if (check['exists'] == true && check['uses_google'] == true) {
+        setState(() {
+          _googleHint = true;
+          _message = '';
+        });
+      } else {
+        setState(() {
+          _googleHint = false;
+          _message = result['message'] ?? 'Error al iniciar sesión';
+        });
+      }
     }
   }
 
@@ -209,6 +226,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   style: TextStyle(color: colors.text),
+                  onChanged: (_) => setState(() => _googleHint = false),
                   decoration: InputDecoration(
                     labelText: 'Correo electrónico',
                     labelStyle: TextStyle(color: colors.textHint),
@@ -262,6 +280,52 @@ class _PantallaLoginState extends State<PantallaLogin> {
                   ),
                 ),
                 const SizedBox(height: 20),
+
+                // Google hint banner
+                if (_googleHint)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF59E0B).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(top: 1),
+                          child: Icon(Icons.info_outline,
+                              color: Color(0xFFF59E0B), size: 20),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Esta cuenta usa Google Sign-In',
+                                style: TextStyle(
+                                  color: Color(0xFFD97706),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Usa el botón "Continuar con Google" para iniciar sesión.',
+                                style: TextStyle(
+                                  color: const Color(0xFFF59E0B).withOpacity(0.8),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
                 // Error message
                 if (_message.isNotEmpty)
