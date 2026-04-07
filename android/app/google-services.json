@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "904557345729",
+    "project_id": "packastock",
+    "storage_bucket": "packastock.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:904557345729:android:7a956d780861fe75190d40",
+        "android_client_info": {
+          "package_name": "com.example.pack_a_stock"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "904557345729-n8vpphbpoq2ma9o84br8mjnbcuota3t7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDznVVyFJZVnXFgvq4u-u5mv0TKqArKQAA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "904557345729-n8vpphbpoq2ma9o84br8mjnbcuota3t7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
