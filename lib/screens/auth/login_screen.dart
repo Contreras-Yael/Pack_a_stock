@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:pack_a_stock/services/auth_service.dart';
 import '../../services/firebase_auth_service.dart';
 import '../../services/notification_service.dart';
+import '../../services/storage_service.dart';
 import '../../config/app_colors.dart';
 import '../home/home_screen.dart';
+import '../inventarista/inventarista_home_screen.dart';
 import 'register_screen.dart';
 
 class PantallaLogin extends StatefulWidget {
@@ -152,11 +154,21 @@ class _PantallaLoginState extends State<PantallaLogin> {
     setState(() => _isLoading = false);
 
     if (result['success'] == true) {
-      NotificationService().startPolling();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      final user = result['user'];
+      final userType = user?.userType ?? 'employee';
+      if (userType == 'inventarista') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const InventaristaHomeScreen()),
+        );
+      } else {
+        NotificationService().startPolling();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
     } else {
       // Check if this account uses Google Sign-In
       final check = await _authService.checkAuthMethod(_emailController.text.trim());

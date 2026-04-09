@@ -18,6 +18,7 @@ class StorageService {
   Future<void> deleteToken() async {
     await _storage.delete(key: 'auth_token');
     await _storage.delete(key: 'refresh_token');
+    await _storage.delete(key: 'user_type');
   }
 
   Future<bool> hasToken() async {
@@ -30,4 +31,10 @@ class StorageService {
 
   Future<String?> getUserId() async =>
       _storage.read(key: 'user_id');
+
+  Future<void> saveUserType(String userType) async =>
+      _storage.write(key: 'user_type', value: userType);
+
+  Future<String?> getUserType() async =>
+      _storage.read(key: 'user_type');
 }

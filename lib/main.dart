@@ -13,6 +13,7 @@ import 'screens/notifications/notifications_screen.dart';
 import 'screens/catalog/catalog_screen.dart';
 import 'screens/stats/stats_screen.dart';
 import 'screens/extensions/extensions_screen.dart';
+import 'screens/inventarista/inventarista_home_screen.dart';
 import 'services/favorites_service.dart';
 import 'services/theme_service.dart';
 import 'config/app_theme.dart';
@@ -53,6 +54,7 @@ class PackAStockApp extends StatelessWidget {
             '/catalog': (context) => const CatalogScreen(),
             '/stats': (context) => const StatsScreen(),
             '/extensions': (context) => const ExtensionsScreen(),
+            '/inventarista': (context) => const InventaristaHomeScreen(),
           },
         );
       },

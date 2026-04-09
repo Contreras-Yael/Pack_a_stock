@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import '../../services/storage_service.dart';
 import '../../services/notification_service.dart';
 import '../../config/app_colors.dart';
 import '../home/home_screen.dart';
+import '../inventarista/inventarista_home_screen.dart';
 import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -24,19 +26,26 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     final authService = AuthService();
+    final storage = StorageService();
     final loggedIn = await authService.isLoggedIn();
 
+    Widget destination;
     if (loggedIn) {
-      NotificationService().startPolling();
+      final userType = await storage.getUserType();
+      if (userType == 'inventarista') {
+        destination = const InventaristaHomeScreen();
+      } else {
+        NotificationService().startPolling();
+        destination = const HomeScreen();
+      }
+    } else {
+      destination = const PantallaLogin();
     }
 
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) =>
-            loggedIn ? const HomeScreen() : const PantallaLogin(),
-      ),
+      MaterialPageRoute(builder: (context) => destination),
     );
   }
 

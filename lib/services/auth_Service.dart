@@ -64,6 +64,7 @@ class AuthService {
         await _storage.saveRefreshToken(tokens['refresh']);
         final user = User.fromJson(userJson);
         await _storage.saveUserId(user.id.toString());
+        await _storage.saveUserType(user.userType);
         return {'success': true, 'user': user};
       } else {
         final errors = data['errors'];
