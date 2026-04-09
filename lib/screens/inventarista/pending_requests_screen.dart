@@ -28,20 +28,13 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
       _loading = true;
       _error = null;
     });
-    try {
-      final requests = await _service.getPendingRequests();
-      if (!mounted) return;
-      setState(() {
-        _requests = requests;
-        _loading = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _error = 'No se pudo cargar las solicitudes';
-        _loading = false;
-      });
-    }
+    final result = await _service.getPendingRequests();
+    if (!mounted) return;
+    setState(() {
+      _requests = result.items;
+      _error = result.error;
+      _loading = false;
+    });
   }
 
   void _showActionDialog(PendingRequest request, bool isApprove) {

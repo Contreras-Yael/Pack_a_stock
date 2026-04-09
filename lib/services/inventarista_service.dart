@@ -98,7 +98,7 @@ class InventaristaService {
   }
 
   // ─── Get pending loan requests ────────────────────────────────────────────
-  Future<List<PendingRequest>> getPendingRequests() async {
+  Future<({List<PendingRequest> items, String? error})> getPendingRequests() async {
     try {
       final headers = await _authHeaders();
       final response = await http.get(
@@ -108,10 +108,18 @@ class InventaristaService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final list = data is List ? data : (data['results'] ?? data['data'] ?? []);
-        return list.map((e) => PendingRequest.fromJson(e)).toList();
+        final items = (list as List)
+            .map((e) => PendingRequest.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return (items: items, error: null);
       }
-    } catch (_) {}
-    return [];
+      return (
+        items: <PendingRequest>[],
+        error: 'HTTP ${response.statusCode}: ${response.body.length > 200 ? response.body.substring(0, 200) : response.body}',
+      );
+    } catch (e) {
+      return (items: <PendingRequest>[], error: 'Excepción: $e');
+    }
   }
 
   // ─── Approve loan request ─────────────────────────────────────────────────
