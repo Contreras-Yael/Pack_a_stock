@@ -162,6 +162,28 @@ class InventaristaService {
     }
   }
 
+  // ─── Update material (PATCH) ──────────────────────────────────────────────
+  Future<Map<String, dynamic>> updateMaterial(int id, Map<String, dynamic> data) async {
+    try {
+      final headers = await _authHeaders();
+      final response = await http.patch(
+        Uri.parse('${ApiConfig.baseUrl}/materials/materials/$id/'),
+        headers: {...headers, 'Content-Type': 'application/json'},
+        body: jsonEncode(data),
+      );
+      final body = json.decode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': body};
+      }
+      return {
+        'success': false,
+        'message': body['detail'] ?? body['message'] ?? 'Error al actualizar',
+      };
+    } catch (_) {
+      return {'success': false, 'message': 'Error de conexión'};
+    }
+  }
+
   // ─── Get material by QR ───────────────────────────────────────────────────
   Future<MaterialItem?> getMaterialByQr(String qrCode) async {
     try {
